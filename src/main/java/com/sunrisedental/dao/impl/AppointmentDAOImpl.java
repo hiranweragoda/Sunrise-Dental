@@ -39,32 +39,48 @@ public class AppointmentDAOImpl implements AppointmentDAO {
         }
     }
 
+    private void syncPaidAppointments(Connection conn) {
+        try (PreparedStatement ps = conn.prepareStatement(
+                "UPDATE appointments SET status = 'Completed' WHERE appointment_number IN (SELECT appointment_number FROM bills WHERE payment_status = 'Paid') AND status != 'Completed'")) {
+            ps.executeUpdate();
+        } catch (Exception e) {
+            // Ignore
+        }
+    }
+
     @Override
     public Appointment getAppointmentByNumber(String appointmentNumber) {
         String sql = "SELECT a.*, t.treatment_name, t.cost, b.payment_status FROM appointments a " +
                      "JOIN treatments t ON a.treatment_id = t.id " +
                      "LEFT JOIN bills b ON a.appointment_number = b.appointment_number " +
                      "WHERE a.appointment_number = ?";
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-            
-            ps.setString(1, appointmentNumber);
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    Appointment app = new Appointment();
-                    app.setAppointmentNumber(rs.getString("appointment_number"));
-                    app.setPatientName(rs.getString("patient_name"));
-                    app.setAddress(rs.getString("address"));
-                    app.setContactNumber(rs.getString("contact_number"));
-                    app.setDentistName(rs.getString("dentist_name"));
-                    app.setTreatmentId(rs.getInt("treatment_id"));
-                    app.setAppointmentDate(rs.getDate("appointment_date"));
-                    app.setAppointmentTime(rs.getTime("appointment_time"));
-                    app.setStatus(rs.getString("status"));
-                    app.setPaymentStatus(rs.getString("payment_status"));
-                    app.setTreatmentName(rs.getString("treatment_name"));
-                    app.setTreatmentCost(rs.getBigDecimal("cost"));
-                    return app;
+        try (Connection conn = DBConnection.getConnection()) {
+            syncPaidAppointments(conn);
+            try (PreparedStatement ps = conn.prepareStatement(sql)) {
+                ps.setString(1, appointmentNumber);
+                try (ResultSet rs = ps.executeQuery()) {
+                    if (rs.next()) {
+                        Appointment app = new Appointment();
+                        app.setAppointmentNumber(rs.getString("appointment_number"));
+                        app.setPatientName(rs.getString("patient_name"));
+                        app.setAddress(rs.getString("address"));
+                        app.setContactNumber(rs.getString("contact_number"));
+                        app.setDentistName(rs.getString("dentist_name"));
+                        app.setTreatmentId(rs.getInt("treatment_id"));
+                        app.setAppointmentDate(rs.getDate("appointment_date"));
+                        app.setAppointmentTime(rs.getTime("appointment_time"));
+                        
+                        String status = rs.getString("status");
+                        String paymentStatus = rs.getString("payment_status");
+                        if ("Paid".equalsIgnoreCase(paymentStatus)) {
+                            status = "Completed";
+                        }
+                        app.setStatus(status);
+                        app.setPaymentStatus(paymentStatus);
+                        app.setTreatmentName(rs.getString("treatment_name"));
+                        app.setTreatmentCost(rs.getBigDecimal("cost"));
+                        return app;
+                    }
                 }
             }
         } catch (Exception e) {
@@ -80,25 +96,33 @@ public class AppointmentDAOImpl implements AppointmentDAO {
                      "JOIN treatments t ON a.treatment_id = t.id " +
                      "LEFT JOIN bills b ON a.appointment_number = b.appointment_number " +
                      "ORDER BY a.appointment_date DESC, a.appointment_time DESC";
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
+        try (Connection conn = DBConnection.getConnection()) {
+            syncPaidAppointments(conn);
+            try (PreparedStatement ps = conn.prepareStatement(sql);
+                 ResultSet rs = ps.executeQuery()) {
 
-            while (rs.next()) {
-                Appointment app = new Appointment();
-                app.setAppointmentNumber(rs.getString("appointment_number"));
-                app.setPatientName(rs.getString("patient_name"));
-                app.setAddress(rs.getString("address"));
-                app.setContactNumber(rs.getString("contact_number"));
-                app.setDentistName(rs.getString("dentist_name"));
-                app.setTreatmentId(rs.getInt("treatment_id"));
-                app.setAppointmentDate(rs.getDate("appointment_date"));
-                app.setAppointmentTime(rs.getTime("appointment_time"));
-                app.setStatus(rs.getString("status"));
-                app.setPaymentStatus(rs.getString("payment_status"));
-                app.setTreatmentName(rs.getString("treatment_name"));
-                app.setTreatmentCost(rs.getBigDecimal("cost"));
-                list.add(app);
+                while (rs.next()) {
+                    Appointment app = new Appointment();
+                    app.setAppointmentNumber(rs.getString("appointment_number"));
+                    app.setPatientName(rs.getString("patient_name"));
+                    app.setAddress(rs.getString("address"));
+                    app.setContactNumber(rs.getString("contact_number"));
+                    app.setDentistName(rs.getString("dentist_name"));
+                    app.setTreatmentId(rs.getInt("treatment_id"));
+                    app.setAppointmentDate(rs.getDate("appointment_date"));
+                    app.setAppointmentTime(rs.getTime("appointment_time"));
+                    
+                    String status = rs.getString("status");
+                    String paymentStatus = rs.getString("payment_status");
+                    if ("Paid".equalsIgnoreCase(paymentStatus)) {
+                        status = "Completed";
+                    }
+                    app.setStatus(status);
+                    app.setPaymentStatus(paymentStatus);
+                    app.setTreatmentName(rs.getString("treatment_name"));
+                    app.setTreatmentCost(rs.getBigDecimal("cost"));
+                    list.add(app);
+                }
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -108,22 +132,91 @@ public class AppointmentDAOImpl implements AppointmentDAO {
 
     @Override
     public List<Map<String, Object>> getDentistStatistics() {
-        List<Map<String, Object>> stats = new ArrayList<>();
-        String sql = "SELECT dentist_name, COUNT(*) as appointment_count FROM appointments GROUP BY dentist_name";
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
+        return getDentistStatistics(null, null);
+    }
 
-            while (rs.next()) {
-                Map<String, Object> map = new HashMap<>();
-                map.put("dentist_name", rs.getString("dentist_name"));
-                map.put("appointment_count", rs.getInt("appointment_count"));
-                stats.add(map);
+    @Override
+    public List<Map<String, Object>> getDentistStatistics(String filterDate, String filterMonth) {
+        List<Map<String, Object>> stats = new ArrayList<>();
+        StringBuilder sql = new StringBuilder("SELECT dentist_name, COUNT(*) as appointment_count FROM appointments WHERE 1=1");
+        
+        if (filterDate != null && !filterDate.trim().isEmpty()) {
+            sql.append(" AND appointment_date = ?");
+        } else if (filterMonth != null && !filterMonth.trim().isEmpty()) {
+            sql.append(" AND DATE_FORMAT(appointment_date, '%Y-%m') = ?");
+        }
+        
+        sql.append(" GROUP BY dentist_name ORDER BY appointment_count DESC");
+
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+
+            int paramIdx = 1;
+            if (filterDate != null && !filterDate.trim().isEmpty()) {
+                ps.setDate(paramIdx++, java.sql.Date.valueOf(filterDate));
+            } else if (filterMonth != null && !filterMonth.trim().isEmpty()) {
+                ps.setString(paramIdx++, filterMonth);
+            }
+
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Map<String, Object> map = new HashMap<>();
+                    map.put("dentist_name", rs.getString("dentist_name"));
+                    map.put("appointment_count", rs.getInt("appointment_count"));
+                    stats.add(map);
+                }
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
         return stats;
+    }
+
+    @Override
+    public Map<String, Integer> getAppointmentCounts(String filterDate, String filterMonth) {
+        Map<String, Integer> counts = new HashMap<>();
+        counts.put("total", 0);
+        counts.put("scheduled", 0);
+        counts.put("completed", 0);
+        counts.put("cancelled", 0);
+
+        StringBuilder sql = new StringBuilder(
+            "SELECT " +
+            "  COUNT(*) as total, " +
+            "  SUM(CASE WHEN status = 'Scheduled' THEN 1 ELSE 0 END) as scheduled, " +
+            "  SUM(CASE WHEN status = 'Completed' THEN 1 ELSE 0 END) as completed, " +
+            "  SUM(CASE WHEN status = 'Cancelled' THEN 1 ELSE 0 END) as cancelled " +
+            "FROM appointments WHERE 1=1"
+        );
+
+        if (filterDate != null && !filterDate.trim().isEmpty()) {
+            sql.append(" AND appointment_date = ?");
+        } else if (filterMonth != null && !filterMonth.trim().isEmpty()) {
+            sql.append(" AND DATE_FORMAT(appointment_date, '%Y-%m') = ?");
+        }
+
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+
+            int paramIdx = 1;
+            if (filterDate != null && !filterDate.trim().isEmpty()) {
+                ps.setDate(paramIdx++, java.sql.Date.valueOf(filterDate));
+            } else if (filterMonth != null && !filterMonth.trim().isEmpty()) {
+                ps.setString(paramIdx++, filterMonth);
+            }
+
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    counts.put("total", rs.getInt("total"));
+                    counts.put("scheduled", rs.getInt("scheduled"));
+                    counts.put("completed", rs.getInt("completed"));
+                    counts.put("cancelled", rs.getInt("cancelled"));
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return counts;
     }
 
     @Override

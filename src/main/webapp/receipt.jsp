@@ -15,201 +15,365 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Payment Receipt - Sunrise Dental</title>
-    <link rel="stylesheet" href="css/style.css">
+    <title>Payment Receipt - Sunrise Dental Clinic</title>
+    <link rel="stylesheet" href="css/style.css?v=10">
     <style>
-        .receipt-card {
-            max-width: 650px;
+        body {
+            background-color: #f1f5f9;
+            color: #0f172a;
+            font-family: 'Outfit', sans-serif, Arial, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            margin: 0;
+            padding: 0;
+        }
+
+        .receipt-container {
+            max-width: 680px;
             margin: 2rem auto;
-            background: #1e293b;
+            width: 100%;
+            padding: 0 1rem;
+        }
+
+        .receipt-card {
+            background: #ffffff;
             border-radius: 16px;
             padding: 2.5rem;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-            border: 1px solid #334155;
-            color: #f8fafc;
+            box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.07), 0 0 1px 1px rgba(0, 0, 0, 0.05);
+            border-top: 5px solid #0284c7;
+            color: #0f172a;
+            position: relative;
         }
+
         .receipt-header {
-            text-align: center;
-            border-bottom: 2px dashed #475569;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            border-bottom: 2px dashed #e2e8f0;
             padding-bottom: 1.5rem;
             margin-bottom: 1.5rem;
         }
+
+        .brand-title-receipt {
+            font-size: 1.75rem;
+            font-weight: 800;
+            color: #0f172a;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .brand-subtitle-receipt {
+            margin: 4px 0 0 0;
+            color: #64748b;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .receipt-badge {
+            background: #dcfce7;
+            color: #15803d;
+            border: 1px solid #bbf7d0;
+            font-weight: 700;
+            font-size: 0.85rem;
+            padding: 6px 14px;
+            border-radius: 20px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .receipt-section-title {
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            color: #64748b;
+            margin-bottom: 0.75rem;
+        }
+
         .receipt-row {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 0.75rem;
+            align-items: center;
+            padding: 0.6rem 0;
+            border-bottom: 1px solid #f1f5f9;
             font-size: 0.95rem;
         }
-        .receipt-label { color: #94a3b8; }
-        .receipt-val { font-weight: 600; color: #ffffff; }
-        .receipt-total {
-            border-top: 2px solid #475569;
-            padding-top: 1rem;
-            margin-top: 1.5rem;
-            font-size: 1.3rem;
-            color: #38bdf8;
+
+        .receipt-row:last-child {
+            border-bottom: none;
         }
 
-        /* PRINT STYLES - Force all elements to solid black text on white paper */
+        .receipt-label {
+            color: #475569;
+            font-weight: 500;
+        }
+
+        .receipt-val {
+            font-weight: 700;
+            color: #0f172a;
+        }
+
+        .receipt-total-box {
+            background: #e0f2fe;
+            border: 1.5px solid #bae6fd;
+            border-radius: 12px;
+            padding: 1.25rem;
+            margin-top: 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .receipt-total-label {
+            font-size: 0.85rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: #0369a1;
+        }
+
+        .receipt-total-val {
+            font-size: 1.6rem;
+            font-weight: 800;
+            color: #0284c7;
+        }
+
+        .cash-summary-box {
+            margin-top: 1.25rem;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            padding: 1rem 1.25rem;
+            border-radius: 12px;
+        }
+
+        .receipt-footer {
+            text-align: center;
+            margin-top: 2rem;
+            border-top: 1px solid #e2e8f0;
+            padding-top: 1.25rem;
+            color: #64748b;
+            font-size: 0.85rem;
+        }
+
+        /* PRINT STYLES - Fix blank page print issue */
         @media print {
             @page {
-                size: portrait;
+                size: A4 portrait;
                 margin: 10mm;
             }
-            * {
-                background: transparent !important;
-                color: #000000 !important;
-                -webkit-text-fill-color: #000000 !important;
-                box-shadow: none !important;
-                text-shadow: none !important;
-                opacity: 1 !important;
-                visibility: visible !important;
-                filter: none !important;
-            }
-            html, body {
-                background: #ffffff !important;
-                color: #000000 !important;
-                height: auto !important;
-                min-height: 0 !important;
-                max-height: none !important;
-                display: block !important;
-                overflow: visible !important;
-                margin: 0 !important;
-                padding: 0 !important;
-                -webkit-print-color-adjust: exact !important;
-                print-color-adjust: exact !important;
-            }
-            .no-print {
+
+            /* Hide top action buttons and non-printable elements */
+            .no-print, header, aside, button {
                 display: none !important;
             }
+
+            /* Reset html & body to pure block layout for print engine */
+            html, body {
+                background: #ffffff !important;
+                color: #0f172a !important;
+                font-family: Arial, sans-serif !important;
+                width: 100% !important;
+                height: auto !important;
+                min-height: auto !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                overflow: visible !important;
+                display: block !important;
+                float: none !important;
+                position: static !important;
+            }
+
+            .receipt-container {
+                display: block !important;
+                width: 100% !important;
+                max-width: 100% !important;
+                height: auto !important;
+                min-height: auto !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                float: none !important;
+                position: static !important;
+                overflow: visible !important;
+            }
+
             .receipt-card {
                 display: block !important;
                 background: #ffffff !important;
-                border: 2px solid #000000 !important;
-                margin: 0 auto !important;
-                width: 100% !important;
-                max-width: 100% !important;
+                color: #0f172a !important;
+                border: 2px solid #cbd5e1 !important;
+                border-top: 5px solid #0284c7 !important;
+                box-shadow: none !important;
+                margin: 0 !important;
                 padding: 20px !important;
-                border-radius: 0 !important;
-                visibility: visible !important;
-                opacity: 1 !important;
+                border-radius: 8px !important;
+                width: 100% !important;
                 height: auto !important;
+                min-height: auto !important;
+                float: none !important;
+                position: static !important;
                 overflow: visible !important;
                 page-break-inside: avoid !important;
-                box-sizing: border-box !important;
+                break-inside: avoid !important;
             }
+
+            h1, h2, h3, h4, p, span, div, strong {
+                color: #0f172a !important;
+                opacity: 1 !important;
+                visibility: visible !important;
+            }
+
             .receipt-row {
                 display: flex !important;
                 justify-content: space-between !important;
-                margin-bottom: 8px !important;
-                font-size: 14px !important;
-                border-bottom: 1px dotted #ccc !important;
-                padding-bottom: 4px !important;
+                align-items: center !important;
+                border-bottom: 1px solid #e2e8f0 !important;
+                padding: 8px 0 !important;
             }
-            .receipt-header {
-                border-bottom: 2px solid #000000 !important;
-                text-align: center !important;
-                padding-bottom: 12px !important;
-                margin-bottom: 15px !important;
+
+            .receipt-total-box {
+                display: flex !important;
+                justify-content: space-between !important;
+                align-items: center !important;
+                background: #e0f2fe !important;
+                border: 1.5px solid #bae6fd !important;
+                padding: 15px !important;
+                border-radius: 8px !important;
             }
-            .receipt-header h1 {
-                font-size: 24px !important;
-                font-weight: bold !important;
+
+            .receipt-total-val {
+                color: #0284c7 !important;
+                font-weight: 800 !important;
             }
-            .receipt-total {
-                border-top: 2px solid #000000 !important;
-                font-size: 18px !important;
-                font-weight: bold !important;
-                margin-top: 15px !important;
-                padding-top: 10px !important;
+
+            .receipt-badge {
+                background: #dcfce7 !important;
+                color: #15803d !important;
+                border: 1px solid #bbf7d0 !important;
+            }
+
+            .cash-summary-box {
+                background: #f8fafc !important;
+                border: 1px solid #cbd5e1 !important;
+                padding: 12px !important;
+                border-radius: 8px !important;
             }
         }
     </style>
 </head>
-<body style="background: #0f172a; min-height: 100vh; display: flex; flex-direction: column;">
+<body>
 
-    <div class="no-print" style="max-width: 650px; margin: 1.5rem auto 0 auto; display: flex; justify-content: space-between; width: 100%;">
-        <a href="dashboard?tab=tab-billing" class="btn btn-secondary" style="background: #334155; color: #fff; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: 600;">← Back to Billing Dashboard</a>
-        <button onclick="window.print()" class="btn btn-primary" style="background: linear-gradient(135deg, #06b6d4, #3b82f6); color: #fff; border: none; padding: 10px 24px; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 1rem;">🖨️ Print Payment Receipt</button>
+    <!-- Header Action Buttons (Screen Only) -->
+    <div class="no-print" style="max-width: 680px; margin: 1.5rem auto 0 auto; display: flex; justify-content: space-between; width: 100%; padding: 0 1rem;">
+        <a href="dashboard?tab=tab-billing" class="btn btn-secondary" style="background: #ffffff; color: #334155; border: 1px solid #cbd5e1; padding: 10px 20px; border-radius: 10px; text-decoration: none; font-weight: 700; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">← Back to Billing Dashboard</a>
+        <button onclick="window.print()" class="btn btn-primary" style="background: linear-gradient(135deg, #0284c7, #06b6d4); color: #ffffff; border: none; padding: 10px 24px; border-radius: 10px; font-weight: 700; cursor: pointer; font-size: 1rem; box-shadow: 0 4px 12px rgba(2, 132, 199, 0.3);">🖨️ Print Payment Receipt</button>
     </div>
 
-    <div class="receipt-card">
-        <div class="receipt-header">
-            <h1 style="margin: 0; font-size: 1.8rem; color: #38bdf8;">🦷 Sunrise Dental Clinic</h1>
-            <p style="margin: 0.25rem 0 0 0; color: #94a3b8; font-size: 0.85rem;">Official Payment Receipt & Statement</p>
-        </div>
-
-        <% if (bill != null) { 
-            boolean isCash = "Cash".equalsIgnoreCase(bill.getPaymentMethod());
-        %>
-            <div class="receipt-row">
-                <span class="receipt-label">Invoice Number:</span>
-                <span class="receipt-val"><%= bill.getBillNumber() %></span>
-            </div>
-            <div class="receipt-row">
-                <span class="receipt-label">Appointment #:</span>
-                <span class="receipt-val"><%= bill.getAppointmentNumber() %></span>
-            </div>
-            <div class="receipt-row">
-                <span class="receipt-label">Patient Name:</span>
-                <span class="receipt-val"><%= bill.getPatientName() %></span>
-            </div>
-            <div class="receipt-row">
-                <span class="receipt-label">Consulting Dentist:</span>
-                <span class="receipt-val"><%= bill.getDentistName() %></span>
-            </div>
-            <div class="receipt-row">
-                <span class="receipt-label">Treatment Service:</span>
-                <span class="receipt-val"><%= bill.getTreatmentName() %></span>
-            </div>
-            <div class="receipt-row">
-                <span class="receipt-label">Payment Method:</span>
-                <span class="receipt-val" style="color: #38bdf8;"><%= isCash ? "💵 Cash Payment" : "💳 Credit / Debit Card" %></span>
-            </div>
-            <div class="receipt-row">
-                <span class="receipt-label">Date & Time Issued:</span>
-                <span class="receipt-val"><%= bill.getBillDate() %></span>
-            </div>
-
-            <div style="margin-top: 1.5rem; border-top: 1px dashed #475569; padding-top: 1rem;">
-                <div class="receipt-row">
-                    <span class="receipt-label">Treatment Package Price:</span>
-                    <span class="receipt-val">LKR <%= String.format("%,.2f", bill.getTreatmentCost()) %></span>
+    <!-- Main Printable Receipt Card -->
+    <div class="receipt-container">
+        <div class="receipt-card">
+            <!-- Receipt Header -->
+            <div class="receipt-header">
+                <div>
+                    <h1 class="brand-title-receipt">
+                        <span style="color: #0284c7;">🦷</span> Sunrise Dental Clinic
+                    </h1>
+                    <p class="brand-subtitle-receipt">Official Payment Receipt & Statement of Account</p>
                 </div>
-                <div class="receipt-row">
-                    <span class="receipt-label">Doctor Consultation Fee:</span>
-                    <span class="receipt-val">LKR <%= String.format("%,.2f", bill.getConsultationFee()) %></span>
+                <div style="text-align: right;">
+                    <span class="receipt-badge">✓ PAID IN FULL</span>
+                    <p style="margin: 6px 0 0 0; color: #64748b; font-size: 0.8rem; font-weight: 600;">Receipt #: <%= bill != null ? bill.getBillNumber() : "-" %></p>
                 </div>
             </div>
 
-            <div class="receipt-row receipt-total">
-                <span>Total Amount Paid:</span>
-                <span style="font-weight: 700;">LKR <%= String.format("%,.2f", bill.getTotalAmount()) %></span>
-            </div>
+            <% if (bill != null) { 
+                boolean isCash = "Cash".equalsIgnoreCase(bill.getPaymentMethod());
+            %>
+                <!-- Patient & Appointment Details -->
+                <div style="margin-bottom: 1.5rem;">
+                    <div class="receipt-section-title">Patient & Invoice Summary</div>
+                    <div class="receipt-row">
+                        <span class="receipt-label">Invoice Number</span>
+                        <span class="receipt-val" style="color: #0284c7;"><%= bill.getBillNumber() %></span>
+                    </div>
+                    <div class="receipt-row">
+                        <span class="receipt-label">Appointment Number</span>
+                        <span class="receipt-val"><%= bill.getAppointmentNumber() %></span>
+                    </div>
+                    <div class="receipt-row">
+                        <span class="receipt-label">Patient Full Name</span>
+                        <span class="receipt-val"><%= bill.getPatientName() %></span>
+                    </div>
+                    <div class="receipt-row">
+                        <span class="receipt-label">Consulting Dentist</span>
+                        <span class="receipt-val" style="color: #0284c7;"><%= bill.getDentistName() %></span>
+                    </div>
+                    <div class="receipt-row">
+                        <span class="receipt-label">Treatment Service</span>
+                        <span class="receipt-val" style="color: #059669;"><%= bill.getTreatmentName() %></span>
+                    </div>
+                    <div class="receipt-row">
+                        <span class="receipt-label">Payment Method</span>
+                        <span class="receipt-val" style="color: #0284c7;"><%= isCash ? "💵 Cash Payment" : "💳 Credit / Debit Card" %></span>
+                    </div>
+                    <div class="receipt-row">
+                        <span class="receipt-label">Date & Time Issued</span>
+                        <span class="receipt-val"><%= bill.getBillDate() %></span>
+                    </div>
+                </div>
 
-            <% if (isCash && bill.getCashGiven() != null) { %>
-                <div style="margin-top: 1rem; background: rgba(255,255,255,0.05); padding: 0.75rem 1rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1);">
-                    <div class="receipt-row" style="margin-bottom: 0.4rem;">
-                        <span class="receipt-label">Cash Given by Patient:</span>
-                        <span class="receipt-val">LKR <%= String.format("%,.2f", bill.getCashGiven()) %></span>
+                <!-- Financial Fee Breakdown -->
+                <div style="margin-top: 1.5rem; border-top: 1px solid #e2e8f0; padding-top: 1.25rem;">
+                    <div class="receipt-section-title">Financial Charges Breakdown</div>
+                    <div class="receipt-row">
+                        <span class="receipt-label">Treatment Package Price</span>
+                        <span class="receipt-val">LKR <%= String.format("%,.2f", bill.getTreatmentCost()) %></span>
                     </div>
-                    <div class="receipt-row" style="margin-bottom: 0;">
-                        <span class="receipt-label">Balance Change Returned:</span>
-                        <span class="receipt-val" style="color: #4ade80;">LKR <%= String.format("%,.2f", bill.getBalanceReturned() != null ? bill.getBalanceReturned() : java.math.BigDecimal.ZERO) %></span>
+                    <div class="receipt-row">
+                        <span class="receipt-label">Doctor Consultation Fee</span>
+                        <span class="receipt-val">LKR <%= String.format("%,.2f", bill.getConsultationFee()) %></span>
                     </div>
+                </div>
+
+                <!-- Total Amount Paid Box -->
+                <div class="receipt-total-box">
+                    <div>
+                        <span class="receipt-total-label">Total Amount Paid</span>
+                        <p style="margin: 2px 0 0 0; color: #64748b; font-size: 0.75rem;">Includes all treatment & consultation fees</p>
+                    </div>
+                    <div class="receipt-total-val">
+                        LKR <%= String.format("%,.2f", bill.getTotalAmount()) %>
+                    </div>
+                </div>
+
+                <!-- Cash Payment Calculation Breakdown -->
+                <% if (isCash && bill.getCashGiven() != null) { %>
+                    <div class="cash-summary-box">
+                        <div class="receipt-row">
+                            <span class="receipt-label">Cash Tendered by Patient</span>
+                            <span class="receipt-val">LKR <%= String.format("%,.2f", bill.getCashGiven()) %></span>
+                        </div>
+                        <div class="receipt-row">
+                            <span class="receipt-label">Balance Change Returned</span>
+                            <span class="receipt-val" style="color: #16a34a; font-size: 1.05rem;">LKR <%= String.format("%,.2f", bill.getBalanceReturned() != null ? bill.getBalanceReturned() : java.math.BigDecimal.ZERO) %></span>
+                        </div>
+                    </div>
+                <% } %>
+
+                <!-- Footer Signature & Thank You -->
+                <div class="receipt-footer">
+                    <p style="margin: 0; font-weight: 700; color: #0f172a; font-size: 0.95rem;">Thank you for visiting Sunrise Dental Clinic!</p>
+                    <p style="margin: 4px 0 0 0; color: #64748b; font-size: 0.8rem;">Issued by System Staff: <strong><%= sessionUser.getFullName() %></strong> (<%= sessionUser.getRole() %>)</p>
+                </div>
+            <% } else { %>
+                <div style="text-align: center; color: #ef4444; padding: 2.5rem;">
+                    <p style="font-size: 1.1rem; font-weight: 700;">⚠️ No receipt data available to display.</p>
+                    <a href="dashboard?tab=tab-billing" style="color: #0284c7; font-weight: 600; text-decoration: underline;">Return to Billing Dashboard</a>
                 </div>
             <% } %>
-
-            <div style="text-align: center; margin-top: 2rem; border-top: 1px solid #334155; padding-top: 1rem; color: #94a3b8; font-size: 0.85rem;">
-                <p style="margin: 0; font-weight: 600;">Thank you for visiting Sunrise Dental Clinic!</p>
-                <p style="margin: 4px 0 0 0; font-size: 0.75rem; font-style: italic;">Issued by Staff: <%= sessionUser.getFullName() %> (<%= sessionUser.getRole() %>)</p>
-            </div>
-        <% } else { %>
-            <div style="text-align: center; color: #f87171; padding: 2rem;">
-                <p style="font-size: 1.1rem; font-weight: 600;">⚠️ No receipt data available to display.</p>
-                <a href="dashboard?tab=tab-billing" style="color: #38bdf8; text-decoration: underline;">Return to Billing Dashboard</a>
-            </div>
-        <% } %>
+        </div>
     </div>
 
 </body>

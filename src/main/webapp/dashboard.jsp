@@ -60,7 +60,7 @@
     <header class="top-nav">
         <div class="brand">
             <span class="logo-icon">🦷</span>
-            <span class="brand-title">Sunrise Dental (Traditional MVC)</span>
+            <span class="brand-title">Sunrise Dental Clinic Management</span>
         </div>
         <div class="user-profile">
             <div class="user-avatar"><%= currentUser.getFullName().substring(0, 1).toUpperCase() %></div>
@@ -167,15 +167,15 @@
                     <form action="dashboard" method="GET" style="margin-bottom: 1.5rem;">
                         <input type="hidden" name="tab" value="tab-register">
                         <div class="form-group full-width">
-                            <label for="search_patient_nic">Patient NIC / Passport Number <span style="font-weight: normal; font-size: 0.8rem; color: #38bdf8;">(Enter NIC or Passport and click Verify Patient)</span></label>
+                            <label for="search_patient_nic">Patient NIC / Passport Number <span style="font-weight: 500; font-size: 0.8rem; color: #0284c7;">(Enter NIC or Passport and click Verify Patient)</span></label>
                             <div style="display: flex; gap: 10px;">
                                 <input type="text" id="search_patient_nic" name="nic" value="<%= enteredNic != null ? enteredNic : "" %>" placeholder="e.g. 199512345678 or N1234567" required style="flex: 1;">
                                 <button type="submit" class="btn btn-secondary">Verify Patient</button>
                             </div>
                             <% if (verifySuccess != null) { %>
-                                <small style="display: block; margin-top: 6px; font-size: 0.85rem; font-weight: 500; color: #4ade80;"><%= verifySuccess %></small>
+                                <small style="display: block; margin-top: 6px; font-size: 0.85rem; font-weight: 500; color: #16a34a;"><%= verifySuccess %></small>
                             <% } else if (verifyError != null) { %>
-                                <small style="display: block; margin-top: 6px; font-size: 0.85rem; font-weight: 500; color: #f87171;"><%= verifyError %></small>
+                                <small style="display: block; margin-top: 6px; font-size: 0.85rem; font-weight: 500; color: #dc2626;"><%= verifyError %></small>
                             <% } %>
                         </div>
                     </form>
@@ -186,17 +186,17 @@
                         <div class="form-grid">
                             <div class="form-group">
                                 <label for="patient_name">Patient Full Name</label>
-                                <input type="text" id="patient_name" value="<%= verifiedPatient != null ? verifiedPatient.getPatientName() : "" %>" placeholder="Auto-filled from registered patient" required readonly style="background: rgba(0,0,0,0.3); opacity: 0.85;">
+                                <input type="text" id="patient_name" value="<%= verifiedPatient != null ? verifiedPatient.getPatientName() : "" %>" placeholder="Auto-filled from registered patient" required readonly style="background: #e2e8f0; color: #334155; font-weight: 600;">
                             </div>
 
                             <div class="form-group">
                                 <label for="contact_number">Contact Number</label>
-                                <input type="tel" id="contact_number" value="<%= verifiedPatient != null ? verifiedPatient.getPhoneNumber() : "" %>" placeholder="Auto-filled" required readonly style="background: rgba(0,0,0,0.3); opacity: 0.85;">
+                                <input type="tel" id="contact_number" value="<%= verifiedPatient != null ? verifiedPatient.getPhoneNumber() : "" %>" placeholder="Auto-filled" required readonly style="background: #e2e8f0; color: #334155; font-weight: 600;">
                             </div>
 
                             <div class="form-group full-width">
                                 <label for="address">Address</label>
-                                <input type="text" id="address" value="<%= (verifiedPatient != null && verifiedPatient.getAddress() != null) ? verifiedPatient.getAddress() : "" %>" placeholder="Auto-filled address" readonly style="background: rgba(0,0,0,0.3); opacity: 0.85;">
+                                <input type="text" id="address" value="<%= (verifiedPatient != null && verifiedPatient.getAddress() != null) ? verifiedPatient.getAddress() : "" %>" placeholder="Auto-filled address" readonly style="background: #e2e8f0; color: #334155; font-weight: 600;">
                             </div>
 
                             <div class="form-group">
@@ -225,13 +225,13 @@
                             </div>
 
                             <div class="form-group">
-                                <label for="appointment_time">Appointment Time <span style="font-size: 0.8rem; color: #38bdf8;">(Select slot below or type time)</span></label>
+                                <label for="appointment_time">Appointment Time <span style="font-size: 0.8rem; color: #0284c7;">(Select slot below or type time)</span></label>
                                 <input type="time" id="appointment_time" name="appointment_time" required>
                             </div>
 
-                            <div class="form-group full-width" id="time-slots-container" style="background: rgba(15, 23, 42, 0.6); padding: 1.25rem; border-radius: 12px; border: 1px solid var(--card-border); margin-top: 0.5rem;">
-                                <label style="margin-bottom: 0.5rem; display: block; font-weight: 600; color: #38bdf8;">⏰ Interactive Doctor Availability & Live Time Slots</label>
-                                <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.75rem;" id="slots-prompt-msg">Please select a Dentist and Date above to view live time slot availability.</p>
+                            <div class="form-group full-width" id="time-slots-container" style="background: #f8fafc; padding: 1.25rem; border-radius: 12px; border: 1px solid #cbd5e1; margin-top: 0.5rem;">
+                                <label style="margin-bottom: 0.5rem; display: block; font-weight: 700; color: #0284c7;">⏰ Interactive Doctor Availability & Live Time Slots</label>
+                                <p style="font-size: 0.85rem; color: #475569; margin-bottom: 0.75rem;" id="slots-prompt-msg">Please select a Dentist and Date above to view live time slot availability.</p>
                                 <div id="slots-grid" style="display: flex; flex-wrap: wrap; gap: 0.6rem;"></div>
                             </div>
                         </div>
@@ -282,39 +282,44 @@
                         </div>
                     </form>
 
-                    <div style="margin-top: 2.5rem;">
-                        <h3 style="margin-bottom: 1rem; color: var(--color-primary);">Registered Clinic Patients Directory</h3>
-                        <div style="overflow-x: auto; background: rgba(0, 0, 0, 0.2); border-radius: 12px; border: 1px solid var(--card-border);">
-                            <table class="report-table">
-                                <thead>
+                </div> <!-- End Form Card Panel -->
+
+                <!-- Separate Panel Card for Patients Directory Table -->
+                <div class="panel" style="margin-top: 1.75rem;">
+                    <div class="panel-header">
+                        <h2 class="panel-title">Registered Clinic Patients Directory</h2>
+                        <p class="panel-subtitle">Complete list of registered clinic patients, NIC numbers, and contact details</p>
+                    </div>
+                    <div style="overflow-x: auto; border-radius: 12px; border: 1px solid #e2e8f0;">
+                        <table class="report-table" style="margin-top: 0;">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Patient Name</th>
+                                    <th>NIC / Passport</th>
+                                    <th>Contact Phone</th>
+                                    <th>Address</th>
+                                    <th style="text-align: right;">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <% if (patients != null && !patients.isEmpty()) { for (Patient p : patients) { %>
                                     <tr>
-                                        <th>ID</th>
-                                        <th>Patient Name</th>
-                                        <th>NIC / Passport</th>
-                                        <th>Contact Phone</th>
-                                        <th>Address</th>
-                                        <th style="text-align: right;">Actions</th>
+                                        <td><%= p.getId() %></td>
+                                        <td style="font-weight: 600;"><%= p.getPatientName() %></td>
+                                        <td><span style="font-family: monospace; background: #f1f5f9; color: #0f172a; padding: 2px 8px; border-radius: 4px; font-weight: 600;"><%= p.getNicPassport() %></span></td>
+                                        <td><%= p.getPhoneNumber() %></td>
+                                        <td><%= p.getAddress() != null ? p.getAddress() : "-" %></td>
+                                        <td style="text-align: right;">
+                                            <button type="button" class="btn btn-secondary" style="padding: 4px 10px; font-size: 0.8rem; margin-right: 4px;" data-id="<%= p.getId() %>" data-name="<%= p.getPatientName() %>" data-nic="<%= p.getNicPassport() %>" data-phone="<%= p.getPhoneNumber() %>" data-address="<%= p.getAddress() != null ? p.getAddress() : "" %>" onclick="handleEditPatient(this)">Edit</button>
+                                            <a href="patients?action=delete&id=<%= p.getId() %>" class="btn btn-danger" style="padding: 4px 10px; font-size: 0.8rem;" onclick="return confirm('Delete patient <%= p.getPatientName() %>?')">Delete</a>
+                                        </td>
                                     </tr>
-                                </thead>
-                                <tbody>
-                                    <% if (patients != null && !patients.isEmpty()) { for (Patient p : patients) { %>
-                                        <tr>
-                                            <td><%= p.getId() %></td>
-                                            <td style="font-weight: 600;"><%= p.getPatientName() %></td>
-                                            <td><span style="font-family: monospace; background: rgba(255,255,255,0.1); padding: 2px 6px; border-radius: 4px;"><%= p.getNicPassport() %></span></td>
-                                            <td><%= p.getPhoneNumber() %></td>
-                                            <td><%= p.getAddress() != null ? p.getAddress() : "-" %></td>
-                                            <td style="text-align: right;">
-                                                <button type="button" class="btn btn-secondary" style="padding: 4px 10px; font-size: 0.8rem; border-color: rgba(56, 189, 248, 0.5); color: #38bdf8; margin-right: 4px;" data-id="<%= p.getId() %>" data-name="<%= p.getPatientName() %>" data-nic="<%= p.getNicPassport() %>" data-phone="<%= p.getPhoneNumber() %>" data-address="<%= p.getAddress() != null ? p.getAddress() : "" %>" onclick="handleEditPatient(this)">Edit</button>
-                                                <a href="patients?action=delete&id=<%= p.getId() %>" class="btn btn-secondary" style="padding: 4px 10px; font-size: 0.8rem; border-color: rgba(239, 68, 68, 0.5); color: #f87171;" onclick="return confirm('Delete patient <%= p.getPatientName() %>?')">Delete</a>
-                                            </td>
-                                        </tr>
-                                    <% } } else { %>
-                                        <tr><td colspan="6" style="text-align: center; color: var(--text-muted);">No registered patients found.</td></tr>
-                                    <% } %>
-                                </tbody>
-                            </table>
-                        </div>
+                                <% } } else { %>
+                                    <tr><td colspan="6" style="text-align: center; color: #64748b;">No registered patients found.</td></tr>
+                                <% } %>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </section>
@@ -346,50 +351,50 @@
 
                     <!-- Search Result Card -->
                     <% if (searchedAppointment != null) { %>
-                        <div style="background: rgba(15, 23, 42, 0.85); border: 2px solid #38bdf8; padding: 1.5rem; border-radius: 16px; margin-bottom: 2rem; box-shadow: 0 8px 20px rgba(56, 189, 248, 0.15);">
-                            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #334155; padding-bottom: 1rem; margin-bottom: 1rem;">
+                        <div style="background: #ffffff; border: 2px solid #0284c7; padding: 1.75rem; border-radius: 16px; margin-bottom: 2rem; box-shadow: 0 10px 25px -5px rgba(2, 132, 199, 0.12);">
+                            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0; padding-bottom: 1rem; margin-bottom: 1.25rem;">
                                 <div>
-                                    <h3 style="margin: 0; font-size: 1.3rem; color: #38bdf8;">Appointment Details (<%= searchedAppointment.getAppointmentNumber() %>)</h3>
-                                    <p style="margin: 4px 0 0 0; color: var(--text-muted); font-size: 0.85rem;">Complete Patient & Schedule Record</p>
+                                    <h3 style="margin: 0; font-size: 1.35rem; color: #0f172a; font-weight: 700;">Appointment Details (<%= searchedAppointment.getAppointmentNumber() %>)</h3>
+                                    <p style="margin: 4px 0 0 0; color: #64748b; font-size: 0.85rem;">Complete Patient & Schedule Record</p>
                                 </div>
                                 <span class="status-pill status-<%= searchedAppointment.getStatus().toLowerCase() %>" style="font-size: 0.95rem; padding: 6px 14px;"><%= searchedAppointment.getStatus() %></span>
                             </div>
 
-                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.25rem;">
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.25rem; background: #f8fafc; padding: 1.25rem; border-radius: 12px; border: 1px solid #e2e8f0;">
                                 <div>
-                                    <strong style="color: var(--text-muted); font-size: 0.8rem; display: block;">PATIENT NAME</strong>
-                                    <span style="font-weight: 600; font-size: 1.1rem; color: #fff;"><%= searchedAppointment.getPatientName() %></span>
+                                    <strong style="color: #64748b; font-size: 0.75rem; font-weight: 700; display: block; letter-spacing: 0.5px;">PATIENT NAME</strong>
+                                    <span style="font-weight: 700; font-size: 1.1rem; color: #0f172a;"><%= searchedAppointment.getPatientName() %></span>
                                 </div>
                                 <div>
-                                    <strong style="color: var(--text-muted); font-size: 0.8rem; display: block;">CONTACT PHONE</strong>
-                                    <span style="font-weight: 600; font-size: 1.1rem; color: #fff;"><%= searchedAppointment.getContactNumber() %></span>
+                                    <strong style="color: #64748b; font-size: 0.75rem; font-weight: 700; display: block; letter-spacing: 0.5px;">CONTACT PHONE</strong>
+                                    <span style="font-weight: 700; font-size: 1.1rem; color: #0f172a;"><%= searchedAppointment.getContactNumber() %></span>
                                 </div>
                                 <div>
-                                    <strong style="color: var(--text-muted); font-size: 0.8rem; display: block;">RESIDENTIAL ADDRESS</strong>
-                                    <span style="font-weight: 500; color: #e2e8f0;"><%= searchedAppointment.getAddress() != null ? searchedAppointment.getAddress() : "-" %></span>
+                                    <strong style="color: #64748b; font-size: 0.75rem; font-weight: 700; display: block; letter-spacing: 0.5px;">RESIDENTIAL ADDRESS</strong>
+                                    <span style="font-weight: 600; color: #334155;"><%= searchedAppointment.getAddress() != null ? searchedAppointment.getAddress() : "-" %></span>
                                 </div>
                                 <div>
-                                    <strong style="color: var(--text-muted); font-size: 0.8rem; display: block;">CONSULTING DENTIST</strong>
-                                    <span style="font-weight: 600; font-size: 1.05rem; color: #38bdf8;"><%= searchedAppointment.getDentistName() %></span>
+                                    <strong style="color: #64748b; font-size: 0.75rem; font-weight: 700; display: block; letter-spacing: 0.5px;">CONSULTING DENTIST</strong>
+                                    <span style="font-weight: 700; font-size: 1.05rem; color: #0284c7;"><%= searchedAppointment.getDentistName() %></span>
                                 </div>
                                 <div>
-                                    <strong style="color: var(--text-muted); font-size: 0.8rem; display: block;">TREATMENT SERVICE</strong>
-                                    <span style="font-weight: 600; font-size: 1.05rem; color: #4ade80;"><%= searchedAppointment.getTreatmentName() %></span>
+                                    <strong style="color: #64748b; font-size: 0.75rem; font-weight: 700; display: block; letter-spacing: 0.5px;">TREATMENT SERVICE</strong>
+                                    <span style="font-weight: 700; font-size: 1.05rem; color: #059669;"><%= searchedAppointment.getTreatmentName() %></span>
                                 </div>
                                 <div>
-                                    <strong style="color: var(--text-muted); font-size: 0.8rem; display: block;">SERVICE COST</strong>
-                                    <span style="font-weight: 600; font-size: 1.05rem; color: #facc15;">LKR <%= String.format("%,.2f", searchedAppointment.getTreatmentCost()) %></span>
+                                    <strong style="color: #64748b; font-size: 0.75rem; font-weight: 700; display: block; letter-spacing: 0.5px;">SERVICE COST</strong>
+                                    <span style="font-weight: 800; font-size: 1.05rem; color: #d97706;">LKR <%= String.format("%,.2f", searchedAppointment.getTreatmentCost()) %></span>
                                 </div>
                                 <div>
-                                    <strong style="color: var(--text-muted); font-size: 0.8rem; display: block;">SCHEDULED DATE & TIME</strong>
-                                    <span style="font-weight: 600; color: #fff;"><%= searchedAppointment.getAppointmentDate() %> @ <%= searchedAppointment.getAppointmentTime() %></span>
+                                    <strong style="color: #64748b; font-size: 0.75rem; font-weight: 700; display: block; letter-spacing: 0.5px;">SCHEDULED DATE & TIME</strong>
+                                    <span style="font-weight: 700; color: #0f172a;"><%= searchedAppointment.getAppointmentDate() %> @ <%= searchedAppointment.getAppointmentTime() %></span>
                                 </div>
                             </div>
 
-                            <div style="margin-top: 1.5rem; border-top: 1px dashed #334155; padding-top: 1rem; display: flex; gap: 10px; flex-wrap: wrap;">
-                                <button type="button" onclick="toggleApptUpdateForm()" class="btn btn-primary" style="background: #38bdf8; border-color: #38bdf8; color: #0f172a; font-weight: 700;">✏️ Update Appointment</button>
+                            <div style="margin-top: 1.5rem; border-top: 1px solid #e2e8f0; padding-top: 1.25rem; display: flex; gap: 12px; flex-wrap: wrap;">
+                                <button type="button" onclick="toggleApptUpdateForm()" class="btn btn-primary" style="padding: 10px 20px; font-weight: 700;">✏️ Update Appointment</button>
                                 <% if (!"Cancelled".equals(searchedAppointment.getStatus())) { %>
-                                    <a href="appointments?action=updateStatus&appointment_number=<%= searchedAppointment.getAppointmentNumber() %>&status=Cancelled" class="btn btn-secondary" style="border-color: #ef4444; color: #ef4444;" onclick="return confirm('Cancel appointment <%= searchedAppointment.getAppointmentNumber() %>?')">Cancel Appointment</a>
+                                    <a href="appointments?action=updateStatus&appointment_number=<%= searchedAppointment.getAppointmentNumber() %>&status=Cancelled" class="btn btn-danger" style="padding: 10px 20px; font-weight: 700;" onclick="return confirm('Cancel appointment <%= searchedAppointment.getAppointmentNumber() %>?')">Cancel Appointment</a>
                                 <% } %>
                             </div>
 
@@ -446,8 +451,16 @@
                         </div>
                     <% } %>
 
-                    <div style="overflow-x: auto; background: rgba(0, 0, 0, 0.2); border-radius: 12px; border: 1px solid var(--card-border);">
-                        <table class="report-table">
+                </div> <!-- End Search Form Card Panel -->
+
+                <!-- Separate Panel Card for Appointments Table -->
+                <div class="panel" style="margin-top: 1.75rem;">
+                    <div class="panel-header">
+                        <h2 class="panel-title">Appointments Directory & Schedules</h2>
+                        <p class="panel-subtitle">View all registered patient appointments, current status, and actions</p>
+                    </div>
+                    <div style="overflow-x: auto; border-radius: 12px; border: 1px solid #e2e8f0;">
+                        <table class="report-table" style="margin-top: 0;">
                             <thead>
                                 <tr>
                                     <th>Appt #</th>
@@ -471,14 +484,14 @@
                                         <td><%= a.getAppointmentDate() %> @ <%= a.getAppointmentTime() %></td>
                                         <td><span class="status-pill status-<%= a.getStatus().toLowerCase() %>"><%= a.getStatus() %></span></td>
                                         <td style="text-align: right;">
-                                            <a href="dashboard?tab=tab-search&search_appt_num=<%= a.getAppointmentNumber() %>" class="btn btn-secondary" style="padding: 4px 10px; font-size: 0.8rem; border-color: rgba(56, 189, 248, 0.5); color: #38bdf8; margin-right: 4px;">Update</a>
+                                            <a href="dashboard?tab=tab-search&search_appt_num=<%= a.getAppointmentNumber() %>" class="btn btn-secondary" style="padding: 4px 10px; font-size: 0.8rem; margin-right: 4px;">Update</a>
                                             <% if (!"Cancelled".equals(a.getStatus())) { %>
-                                                <a href="appointments?action=updateStatus&appointment_number=<%= a.getAppointmentNumber() %>&status=Cancelled" class="btn btn-secondary" style="padding: 4px 10px; font-size: 0.8rem; border-color: rgba(239, 68, 68, 0.5); color: #f87171;" onclick="return confirm('Cancel appointment <%= a.getAppointmentNumber() %>?')">Cancel</a>
+                                                <a href="appointments?action=updateStatus&appointment_number=<%= a.getAppointmentNumber() %>&status=Cancelled" class="btn btn-danger" style="padding: 4px 10px; font-size: 0.8rem;" onclick="return confirm('Cancel appointment <%= a.getAppointmentNumber() %>?')">Cancel</a>
                                             <% } %>
                                         </td>
                                     </tr>
                                 <% } } else { %>
-                                    <tr><td colspan="7" style="text-align: center; color: var(--text-muted);">No appointments found.</td></tr>
+                                    <tr><td colspan="7" style="text-align: center; color: #64748b;">No appointments found.</td></tr>
                                 <% } %>
                             </tbody>
                         </table>
@@ -513,72 +526,72 @@
                     <% if (selectedBillAppt != null) {
                         boolean isPaid = "Paid".equalsIgnoreCase(selectedBillAppt.getPaymentStatus());
                     %>
-                        <div style="background: rgba(15, 23, 42, 0.85); border: 2px solid #38bdf8; padding: 1.5rem; border-radius: 16px; margin-bottom: 2rem; box-shadow: 0 8px 20px rgba(56, 189, 248, 0.15);">
-                            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #334155; padding-bottom: 1rem; margin-bottom: 1rem;">
+                        <div style="background: #ffffff; border: 2px solid #0284c7; padding: 1.75rem; border-radius: 16px; margin-bottom: 2rem; box-shadow: 0 10px 25px -5px rgba(2, 132, 199, 0.12);">
+                            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0; padding-bottom: 1rem; margin-bottom: 1.25rem;">
                                 <div>
-                                    <h3 style="margin: 0; font-size: 1.3rem; color: #38bdf8;">Appointment Billing Details (<%= selectedBillAppt.getAppointmentNumber() %>)</h3>
-                                    <p style="margin: 4px 0 0 0; color: var(--text-muted); font-size: 0.85rem;">Patient details & Consultation Fee calculator</p>
+                                    <h3 style="margin: 0; font-size: 1.35rem; color: #0f172a; font-weight: 700;">Appointment Billing Details (<%= selectedBillAppt.getAppointmentNumber() %>)</h3>
+                                    <p style="margin: 4px 0 0 0; color: #64748b; font-size: 0.85rem;">Patient details & Consultation Fee calculator</p>
                                 </div>
                                 <div>
                                     <% if (isPaid) { %>
-                                        <span class="status-pill status-completed" style="font-size: 0.95rem; padding: 6px 14px; background: rgba(34, 197, 94, 0.2); color: #4ade80; border: 1px solid rgba(34, 197, 94, 0.4);">✓ Paid</span>
+                                        <span class="status-pill status-paid" style="font-size: 0.9rem; padding: 6px 16px;">✓ Paid</span>
                                     <% } else { %>
-                                        <span class="status-pill status-scheduled" style="font-size: 0.95rem; padding: 6px 14px; background: rgba(245, 158, 11, 0.2); color: #f59e0b; border: 1px solid rgba(245, 158, 11, 0.4);">⚠️ Unpaid</span>
+                                        <span class="status-pill status-unpaid" style="font-size: 0.9rem; padding: 6px 16px;">⚠️ Unpaid</span>
                                     <% } %>
                                 </div>
                             </div>
 
-                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.25rem; margin-bottom: 1.5rem;">
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.25rem; background: #f8fafc; padding: 1.25rem; border-radius: 12px; border: 1px solid #e2e8f0; margin-bottom: 1.5rem;">
                                 <div>
-                                    <strong style="color: var(--text-muted); font-size: 0.8rem; display: block;">PATIENT NAME</strong>
-                                    <span style="font-weight: 600; font-size: 1.1rem; color: #fff;"><%= selectedBillAppt.getPatientName() %></span>
+                                    <strong style="color: #64748b; font-size: 0.75rem; font-weight: 700; display: block; letter-spacing: 0.5px;">PATIENT NAME</strong>
+                                    <span style="font-weight: 700; font-size: 1.1rem; color: #0f172a;"><%= selectedBillAppt.getPatientName() %></span>
                                 </div>
                                 <div>
-                                    <strong style="color: var(--text-muted); font-size: 0.8rem; display: block;">CONTACT PHONE</strong>
-                                    <span style="font-weight: 600; font-size: 1.1rem; color: #fff;"><%= selectedBillAppt.getContactNumber() %></span>
+                                    <strong style="color: #64748b; font-size: 0.75rem; font-weight: 700; display: block; letter-spacing: 0.5px;">CONTACT PHONE</strong>
+                                    <span style="font-weight: 700; font-size: 1.1rem; color: #0f172a;"><%= selectedBillAppt.getContactNumber() %></span>
                                 </div>
                                 <div>
-                                    <strong style="color: var(--text-muted); font-size: 0.8rem; display: block;">RESIDENTIAL ADDRESS</strong>
-                                    <span style="font-weight: 500; color: #e2e8f0;"><%= selectedBillAppt.getAddress() != null ? selectedBillAppt.getAddress() : "-" %></span>
+                                    <strong style="color: #64748b; font-size: 0.75rem; font-weight: 700; display: block; letter-spacing: 0.5px;">RESIDENTIAL ADDRESS</strong>
+                                    <span style="font-weight: 600; color: #334155;"><%= selectedBillAppt.getAddress() != null ? selectedBillAppt.getAddress() : "-" %></span>
                                 </div>
                                 <div>
-                                    <strong style="color: var(--text-muted); font-size: 0.8rem; display: block;">CONSULTING DENTIST</strong>
-                                    <span style="font-weight: 600; font-size: 1.05rem; color: #38bdf8;"><%= selectedBillAppt.getDentistName() %></span>
+                                    <strong style="color: #64748b; font-size: 0.75rem; font-weight: 700; display: block; letter-spacing: 0.5px;">CONSULTING DENTIST</strong>
+                                    <span style="font-weight: 700; font-size: 1.05rem; color: #0284c7;"><%= selectedBillAppt.getDentistName() %></span>
                                 </div>
                                 <div>
-                                    <strong style="color: var(--text-muted); font-size: 0.8rem; display: block;">TREATMENT SERVICE</strong>
-                                    <span style="font-weight: 600; font-size: 1.05rem; color: #4ade80;"><%= selectedBillAppt.getTreatmentName() %></span>
+                                    <strong style="color: #64748b; font-size: 0.75rem; font-weight: 700; display: block; letter-spacing: 0.5px;">TREATMENT SERVICE</strong>
+                                    <span style="font-weight: 700; font-size: 1.05rem; color: #059669;"><%= selectedBillAppt.getTreatmentName() %></span>
                                 </div>
                                 <div>
-                                    <strong style="color: var(--text-muted); font-size: 0.8rem; display: block;">TREATMENT PACKAGE PRICE</strong>
-                                    <span style="font-weight: 600; font-size: 1.05rem; color: #facc15;">LKR <%= String.format("%,.2f", selectedBillAppt.getTreatmentCost()) %></span>
+                                    <strong style="color: #64748b; font-size: 0.75rem; font-weight: 700; display: block; letter-spacing: 0.5px;">TREATMENT PACKAGE PRICE</strong>
+                                    <span style="font-weight: 800; font-size: 1.05rem; color: #d97706;">LKR <%= String.format("%,.2f", selectedBillAppt.getTreatmentCost()) %></span>
                                 </div>
                                 <div>
-                                    <strong style="color: var(--text-muted); font-size: 0.8rem; display: block;">SCHEDULED DATE & TIME</strong>
-                                    <span style="font-weight: 600; color: #fff;"><%= selectedBillAppt.getAppointmentDate() %> @ <%= selectedBillAppt.getAppointmentTime() %></span>
+                                    <strong style="color: #64748b; font-size: 0.75rem; font-weight: 700; display: block; letter-spacing: 0.5px;">SCHEDULED DATE & TIME</strong>
+                                    <span style="font-weight: 700; color: #0f172a;"><%= selectedBillAppt.getAppointmentDate() %> @ <%= selectedBillAppt.getAppointmentTime() %></span>
                                 </div>
                             </div>
 
                             <!-- Payment Entry Form -->
-                            <form action="bills" method="POST" style="border-top: 1px dashed #334155; padding-top: 1.25rem; margin-top: 1rem;">
+                            <form action="bills" method="POST" style="border-top: 1px solid #e2e8f0; padding-top: 1.25rem; margin-top: 1rem;">
                                 <input type="hidden" name="appointment_number" value="<%= selectedBillAppt.getAppointmentNumber() %>">
                                 <input type="hidden" id="treatment_cost_val" value="<%= selectedBillAppt.getTreatmentCost() %>">
                                 <input type="hidden" id="balance_returned" name="balance_returned" value="0.00">
 
                                 <div class="form-grid">
                                     <div class="form-group full-width">
-                                        <label for="consultation_fee">Doctor Consultation Fee (LKR) <span style="color: #f87171;">*</span></label>
-                                        <input type="number" step="0.01" id="consultation_fee" name="consultation_fee" placeholder="Enter doctor consultation fee (e.g. 1500.00)" required autofocus oninput="calculateCashBalance()" style="font-size: 1.1rem; padding: 12px;">
+                                        <label for="consultation_fee" style="color: #0f172a; font-weight: 700;">Doctor Consultation Fee (LKR) <span style="color: #ef4444;">*</span></label>
+                                        <input type="number" step="0.01" id="consultation_fee" name="consultation_fee" placeholder="Enter doctor consultation fee (e.g. 1500.00)" required autofocus oninput="calculateCashBalance()" style="font-size: 1.1rem; padding: 12px; background: #ffffff; border: 1.5px solid #cbd5e1; color: #0f172a; font-weight: 600;">
                                     </div>
 
                                     <div class="form-group full-width">
-                                        <label style="display: block; margin-bottom: 8px;">Select Payment Method <span style="color: #f87171;">*</span></label>
-                                        <div style="display: flex; gap: 20px; background: rgba(0,0,0,0.3); padding: 12px 16px; border-radius: 8px; border: 1px solid var(--card-border);">
-                                            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-weight: 600; color: #38bdf8;">
+                                        <label style="display: block; margin-bottom: 8px; color: #0f172a; font-weight: 700;">Select Payment Method <span style="color: #ef4444;">*</span></label>
+                                        <div style="display: flex; gap: 20px; background: #f8fafc; padding: 12px 16px; border-radius: 8px; border: 1.5px solid #cbd5e1;">
+                                            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-weight: 700; color: #0284c7;">
                                                 <input type="radio" id="method-cash" name="payment_method" value="Cash" checked onclick="switchPaymentMethod('Cash')">
                                                 💵 Cash Payment
                                             </label>
-                                            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-weight: 600; color: #c084fc;">
+                                            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-weight: 700; color: #7c3aed;">
                                                 <input type="radio" id="method-card" name="payment_method" value="Card" onclick="switchPaymentMethod('Card')">
                                                 💳 Credit / Debit Card
                                             </label>
@@ -587,116 +600,120 @@
                                 </div>
 
                                 <!-- Total Bill Summary Box -->
-                                <div style="background: rgba(56, 189, 248, 0.1); border: 1px solid rgba(56, 189, 248, 0.3); padding: 1rem; border-radius: 10px; margin-top: 1rem; display: flex; justify-content: space-between; align-items: center;">
+                                <div style="background: #e0f2fe; border: 1.5px solid #bae6fd; padding: 1rem 1.25rem; border-radius: 10px; margin-top: 1rem; display: flex; justify-content: space-between; align-items: center;">
                                     <div>
-                                        <span style="color: var(--text-muted); font-size: 0.85rem; display: block;">ESTIMATED TOTAL BILL (Treatment + Consultation)</span>
-                                        <span style="font-size: 1.3rem; font-weight: 700; color: #38bdf8;">LKR <span id="calc_total_cost"><%= String.format("%,.2f", selectedBillAppt.getTreatmentCost()) %></span></span>
+                                        <span style="color: #0369a1; font-size: 0.8rem; font-weight: 700; text-transform: uppercase; display: block;">ESTIMATED TOTAL BILL (Treatment + Consultation)</span>
+                                        <span style="font-size: 1.5rem; font-weight: 800; color: #0284c7;">LKR <span id="calc_total_cost"><%= String.format("%,.2f", selectedBillAppt.getTreatmentCost()) %></span></span>
                                     </div>
                                 </div>
 
                                 <!-- CASH PAYMENT SECTION -->
-                                <div id="cash-payment-section" style="margin-top: 1.25rem; background: rgba(0,0,0,0.25); padding: 1.25rem; border-radius: 12px; border: 1px solid var(--card-border);">
-                                    <h4 style="margin: 0 0 1rem 0; color: #38bdf8;">💵 Cash Payment & Balance Calculator</h4>
+                                <div id="cash-payment-section" style="margin-top: 1.25rem; background: #f8fafc; padding: 1.25rem; border-radius: 12px; border: 1.5px solid #cbd5e1;">
+                                    <h4 style="margin: 0 0 1rem 0; color: #0284c7; font-weight: 700;">💵 Cash Payment & Balance Calculator</h4>
                                     <div class="form-grid">
                                         <div class="form-group">
-                                            <label for="cash_given">Cash Given by Patient (LKR) <span style="color: #f87171;">*</span></label>
-                                            <input type="number" step="0.01" id="cash_given" name="cash_given" placeholder="e.g. 10000.00" oninput="calculateCashBalance()" style="font-size: 1.05rem;">
+                                            <label for="cash_given" style="color: #0f172a; font-weight: 700;">Cash Given by Patient (LKR) <span style="color: #ef4444;">*</span></label>
+                                            <input type="number" step="0.01" id="cash_given" name="cash_given" placeholder="e.g. 10000.00" oninput="calculateCashBalance()" style="font-size: 1.05rem; background: #ffffff; border: 1.5px solid #cbd5e1; color: #0f172a; font-weight: 600;">
                                         </div>
 
                                         <div class="form-group">
-                                            <label>Balance Change to Return to Patient</label>
-                                            <div style="background: rgba(0,0,0,0.4); padding: 10px 14px; border-radius: 8px; border: 1px solid var(--card-border); font-size: 1.2rem; font-weight: 700;">
-                                                <span id="calc_balance" style="color: #4ade80;">LKR 0.00</span>
+                                            <label style="color: #0f172a; font-weight: 700;">Balance Change to Return to Patient</label>
+                                            <div style="background: #ffffff; padding: 10px 14px; border-radius: 8px; border: 1.5px solid #cbd5e1; font-size: 1.2rem; font-weight: 800;">
+                                                <span id="calc_balance" style="color: #16a34a;">LKR 0.00</span>
                                             </div>
                                         </div>
                                     </div>
-                                    <small id="cash_error_msg" style="display: none; color: #f87171; font-weight: 600; margin-top: 6px;"></small>
+                                    <small id="cash_error_msg" style="display: none; color: #dc2626; font-weight: 700; margin-top: 6px;"></small>
                                 </div>
 
                                 <!-- CARD PAYMENT SECTION -->
-                                <div id="card-payment-section" style="display: none; margin-top: 1.25rem; background: rgba(0,0,0,0.25); padding: 1.25rem; border-radius: 12px; border: 1px solid var(--card-border);">
+                                <div id="card-payment-section" style="display: none; margin-top: 1.25rem; background: #f8fafc; padding: 1.25rem; border-radius: 12px; border: 1.5px solid #cbd5e1;">
                                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                                        <h4 style="margin: 0; color: #c084fc;">💳 Credit / Debit Card Processing</h4>
-                                        <span style="font-size: 0.75rem; background: rgba(255,255,255,0.1); padding: 4px 10px; border-radius: 12px; color: #94a3b8;">🔒 Card details are client-processed and NOT saved in database</span>
+                                        <h4 style="margin: 0; color: #7c3aed; font-weight: 700;">💳 Credit / Debit Card Processing</h4>
+                                        <span style="font-size: 0.75rem; background: #f1f5f9; border: 1px solid #cbd5e1; padding: 4px 10px; border-radius: 12px; color: #475569; font-weight: 600;">🔒 Card details are client-processed and NOT saved in database</span>
                                     </div>
                                     
                                     <div class="form-grid">
                                         <div class="form-group full-width">
-                                            <label>Cardholder Name</label>
-                                            <input type="text" placeholder="Name on card e.g. M N PERERA" style="font-size: 1rem;">
+                                            <label style="color: #0f172a; font-weight: 700;">Cardholder Name</label>
+                                            <input type="text" placeholder="Name on card e.g. M N PERERA" style="font-size: 1rem; background: #ffffff; border: 1.5px solid #cbd5e1; color: #0f172a;">
                                         </div>
 
                                         <div class="form-group">
-                                            <label>Card Number</label>
-                                            <input type="text" placeholder="1234 5678 9101 1121" maxlength="19" oninput="formatCardNumber(this)" style="font-size: 1rem; font-family: monospace;">
+                                            <label style="color: #0f172a; font-weight: 700;">Card Number</label>
+                                            <input type="text" placeholder="1234 5678 9101 1121" maxlength="19" oninput="formatCardNumber(this)" style="font-size: 1rem; font-family: monospace; background: #ffffff; border: 1.5px solid #cbd5e1; color: #0f172a;">
                                         </div>
 
                                         <div class="form-group">
-                                            <label>Expiration Date (MM/YY)</label>
-                                            <input type="text" placeholder="MM/YY" maxlength="5" oninput="formatCardExpiry(this)" style="font-size: 1rem; font-family: monospace;">
+                                            <label style="color: #0f172a; font-weight: 700;">Expiration Date (MM/YY)</label>
+                                            <input type="text" placeholder="MM/YY" maxlength="5" oninput="formatCardExpiry(this)" style="font-size: 1rem; font-family: monospace; background: #ffffff; border: 1.5px solid #cbd5e1; color: #0f172a;">
                                         </div>
 
                                         <div class="form-group">
-                                            <label>CVV / CVC Code</label>
-                                            <input type="password" placeholder="123" maxlength="4" style="font-size: 1rem; font-family: monospace;">
+                                            <label style="color: #0f172a; font-weight: 700;">CVV / CVC Code</label>
+                                            <input type="password" placeholder="123" maxlength="4" style="font-size: 1rem; font-family: monospace; background: #ffffff; border: 1.5px solid #cbd5e1; color: #0f172a;">
                                         </div>
                                     </div>
                                 </div>
 
                                 <div class="form-actions" style="margin-top: 1.5rem; display: flex; gap: 10px; flex-wrap: wrap;">
-                                    <button type="submit" id="btn-submit-payment" class="btn btn-primary" style="background: #22c55e; border-color: #22c55e; font-weight: 700; font-size: 1rem; padding: 10px 20px;">💳 Generate Payment Receipt & Mark as Paid</button>
-                                    <a href="dashboard?tab=tab-billing" class="btn btn-secondary">Select Another Patient</a>
+                                    <button type="submit" id="btn-submit-payment" class="btn btn-primary" style="background: #16a34a; border-color: #16a34a; font-weight: 700; font-size: 1rem; padding: 10px 20px;">💳 Generate Payment Receipt & Mark as Paid</button>
+                                    <a href="dashboard?tab=tab-billing" class="btn btn-secondary" style="font-weight: 600;">Select Another Patient</a>
                                 </div>
                             </form>
                         </div>
                     <% } %>
 
-                    <!-- Appointments Billing Directory Table -->
-                    <div style="margin-top: 1.5rem;">
-                        <h3 style="margin-bottom: 1rem; color: var(--color-primary);">Appointments Billing Directory</h3>
-                        <div style="overflow-x: auto; background: rgba(0, 0, 0, 0.2); border-radius: 12px; border: 1px solid var(--card-border);">
-                            <table class="report-table">
-                                <thead>
-                                    <tr>
-                                        <th>Appt #</th>
-                                        <th>Patient Name</th>
-                                        <th>Contact</th>
-                                        <th>Dentist</th>
-                                        <th>Treatment</th>
-                                        <th>Price</th>
-                                        <th>Payment Status</th>
-                                        <th style="text-align: right;">Action</th>
+                </div> <!-- End Billing Calculator Card Panel -->
+
+                <!-- Separate Panel Card for Appointments Billing Directory Table -->
+                <div class="panel" style="margin-top: 1.75rem;">
+                    <div class="panel-header">
+                        <h2 class="panel-title">Appointments Billing Directory</h2>
+                        <p class="panel-subtitle">Select an appointment from the table below to process payment or view bill details</p>
+                    </div>
+                    <div style="overflow-x: auto; border-radius: 12px; border: 1px solid #e2e8f0;">
+                        <table class="report-table" style="margin-top: 0;">
+                            <thead>
+                                <tr>
+                                    <th>Appt #</th>
+                                    <th>Patient Name</th>
+                                    <th>Contact</th>
+                                    <th>Dentist</th>
+                                    <th>Treatment</th>
+                                    <th>Price</th>
+                                    <th>Payment Status</th>
+                                    <th style="text-align: right;">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <% if (appointments != null && !appointments.isEmpty()) { for (Appointment a : appointments) {
+                                    boolean isSel = (selectedBillAppt != null && a.getAppointmentNumber().equals(selectedBillAppt.getAppointmentNumber()));
+                                    boolean aPaid = "Paid".equalsIgnoreCase(a.getPaymentStatus());
+                                %>
+                                    <tr class="<%= isSel ? "highlight-row" : "" %>">
+                                        <td><strong><%= a.getAppointmentNumber() %></strong></td>
+                                        <td style="font-weight: 600;"><%= a.getPatientName() %></td>
+                                        <td><%= a.getContactNumber() %></td>
+                                        <td><%= a.getDentistName() %></td>
+                                        <td><%= a.getTreatmentName() %></td>
+                                        <td>LKR <%= String.format("%,.2f", a.getTreatmentCost()) %></td>
+                                        <td>
+                                            <% if (aPaid) { %>
+                                                <span class="status-pill status-paid">✓ Paid</span>
+                                            <% } else { %>
+                                                <span class="status-pill status-unpaid">⚠️ Unpaid</span>
+                                            <% } %>
+                                        </td>
+                                        <td style="text-align: right;">
+                                            <a href="dashboard?tab=tab-billing&bill_appt_num=<%= a.getAppointmentNumber() %>" class="btn btn-primary" style="padding: 6px 14px; font-size: 0.85rem;">Calculate & Bill</a>
+                                        </td>
                                     </tr>
-                                </thead>
-                                <tbody>
-                                    <% if (appointments != null && !appointments.isEmpty()) { for (Appointment a : appointments) {
-                                        boolean isSel = (selectedBillAppt != null && a.getAppointmentNumber().equals(selectedBillAppt.getAppointmentNumber()));
-                                        boolean aPaid = "Paid".equalsIgnoreCase(a.getPaymentStatus());
-                                    %>
-                                        <tr class="<%= isSel ? "highlight-row" : "" %>">
-                                            <td><strong><%= a.getAppointmentNumber() %></strong></td>
-                                            <td style="font-weight: 600;"><%= a.getPatientName() %></td>
-                                            <td><%= a.getContactNumber() %></td>
-                                            <td><%= a.getDentistName() %></td>
-                                            <td><%= a.getTreatmentName() %></td>
-                                            <td>LKR <%= String.format("%,.2f", a.getTreatmentCost()) %></td>
-                                            <td>
-                                                <% if (aPaid) { %>
-                                                    <span class="status-pill status-completed" style="background: rgba(34, 197, 94, 0.2); color: #4ade80; border: 1px solid rgba(34, 197, 94, 0.4);">✓ Paid</span>
-                                                <% } else { %>
-                                                    <span class="status-pill status-scheduled" style="background: rgba(245, 158, 11, 0.2); color: #f59e0b; border: 1px solid rgba(245, 158, 11, 0.4);">⚠️ Unpaid</span>
-                                                <% } %>
-                                            </td>
-                                            <td style="text-align: right;">
-                                                <a href="dashboard?tab=tab-billing&bill_appt_num=<%= a.getAppointmentNumber() %>" class="btn btn-primary" style="padding: 6px 14px; font-size: 0.85rem; background: linear-gradient(135deg, #06b6d4, #3b82f6);">Calculate & Bill</a>
-                                            </td>
-                                        </tr>
-                                    <% } } else { %>
-                                        <tr><td colspan="8" style="text-align: center; color: var(--text-muted);">No appointments found.</td></tr>
-                                    <% } %>
-                                </tbody>
-                            </table>
-                        </div>
+                                <% } } else { %>
+                                    <tr><td colspan="8" style="text-align: center; color: #64748b;">No appointments found.</td></tr>
+                                <% } %>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </section>
@@ -748,37 +765,42 @@
                         </div>
                     </form>
 
-                    <div style="margin-top: 2.5rem;">
-                        <h3 style="margin-bottom: 1rem; color: var(--color-primary);">System Users List</h3>
-                        <div style="overflow-x: auto; background: rgba(0, 0, 0, 0.2); border-radius: 12px; border: 1px solid var(--card-border);">
-                            <table class="report-table">
-                                <thead>
+                </div> <!-- End User Form Card Panel -->
+
+                <!-- Separate Panel Card for System Users Table -->
+                <div class="panel" style="margin-top: 1.75rem;">
+                    <div class="panel-header">
+                        <h2 class="panel-title">System Users Directory</h2>
+                        <p class="panel-subtitle">Registered system administrator and clinical staff user accounts</p>
+                    </div>
+                    <div style="overflow-x: auto; border-radius: 12px; border: 1px solid #e2e8f0;">
+                        <table class="report-table" style="margin-top: 0;">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Username</th>
+                                    <th>Full Name</th>
+                                    <th>Role</th>
+                                    <th style="text-align: right;">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <% if (users != null && !users.isEmpty()) { for (User u : users) { %>
                                     <tr>
-                                        <th>ID</th>
-                                        <th>Username</th>
-                                        <th>Full Name</th>
-                                        <th>Role</th>
-                                        <th style="text-align: right;">Actions</th>
+                                        <td><%= u.getId() %></td>
+                                        <td style="font-weight: 600;"><%= u.getUsername() %></td>
+                                        <td><%= u.getFullName() %></td>
+                                        <td><span class="status-pill status-scheduled"><%= u.getRole() %></span></td>
+                                        <td style="text-align: right;">
+                                            <button type="button" class="btn btn-secondary" style="padding: 4px 10px; font-size: 0.8rem; margin-right: 4px;" data-id="<%= u.getId() %>" data-username="<%= u.getUsername() %>" data-fullname="<%= u.getFullName() %>" data-role="<%= u.getRole() %>" onclick="handleEditUser(this)">Edit</button>
+                                            <a href="users?action=delete&id=<%= u.getId() %>" class="btn btn-danger" style="padding: 4px 10px; font-size: 0.8rem;" onclick="return confirm('Delete user <%= u.getUsername() %>?')">Delete</a>
+                                        </td>
                                     </tr>
-                                </thead>
-                                <tbody>
-                                    <% if (users != null && !users.isEmpty()) { for (User u : users) { %>
-                                        <tr>
-                                            <td><%= u.getId() %></td>
-                                            <td style="font-weight: 600;"><%= u.getUsername() %></td>
-                                            <td><%= u.getFullName() %></td>
-                                            <td><span class="status-pill status-scheduled"><%= u.getRole() %></span></td>
-                                            <td style="text-align: right;">
-                                                <button type="button" class="btn btn-secondary" style="padding: 4px 10px; font-size: 0.8rem; border-color: rgba(56, 189, 248, 0.5); color: #38bdf8; margin-right: 4px;" data-id="<%= u.getId() %>" data-username="<%= u.getUsername() %>" data-fullname="<%= u.getFullName() %>" data-role="<%= u.getRole() %>" onclick="handleEditUser(this)">Edit</button>
-                                                <a href="users?action=delete&id=<%= u.getId() %>" class="btn btn-secondary" style="padding: 4px 10px; font-size: 0.8rem; border-color: rgba(239, 68, 68, 0.5); color: #f87171;" onclick="return confirm('Delete user <%= u.getUsername() %>?')">Delete</a>
-                                            </td>
-                                        </tr>
-                                    <% } } else { %>
-                                        <tr><td colspan="5" style="text-align: center; color: var(--text-muted);">No users found.</td></tr>
-                                    <% } %>
-                                </tbody>
-                            </table>
-                        </div>
+                                <% } } else { %>
+                                    <tr><td colspan="5" style="text-align: center; color: #64748b;">No users found.</td></tr>
+                                <% } %>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </section>
@@ -826,37 +848,42 @@
                         </div>
                     </form>
 
-                    <div style="margin-top: 2.5rem;">
-                        <h3 style="margin-bottom: 1rem; color: var(--color-primary);">Registered Dentists List</h3>
-                        <div style="overflow-x: auto; background: rgba(0, 0, 0, 0.2); border-radius: 12px; border: 1px solid var(--card-border);">
-                            <table class="report-table">
-                                <thead>
+                </div> <!-- End Dentist Form Card Panel -->
+
+                <!-- Separate Panel Card for Registered Dentists Table -->
+                <div class="panel" style="margin-top: 1.75rem;">
+                    <div class="panel-header">
+                        <h2 class="panel-title">Registered Dentists Directory</h2>
+                        <p class="panel-subtitle">List of consulting dentists, specializations, and contact phone numbers</p>
+                    </div>
+                    <div style="overflow-x: auto; border-radius: 12px; border: 1px solid #e2e8f0;">
+                        <table class="report-table" style="margin-top: 0;">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Dentist Name</th>
+                                    <th>Specialization</th>
+                                    <th>Contact Number</th>
+                                    <th style="text-align: right;">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <% if (dentists != null && !dentists.isEmpty()) { for (Dentist d : dentists) { %>
                                     <tr>
-                                        <th>ID</th>
-                                        <th>Dentist Name</th>
-                                        <th>Specialization</th>
-                                        <th>Contact Number</th>
-                                        <th style="text-align: right;">Actions</th>
+                                        <td><%= d.getId() %></td>
+                                        <td style="font-weight: 600;"><%= d.getDentistName() %></td>
+                                        <td><%= d.getSpecialization() %></td>
+                                        <td><%= d.getContactNumber() != null ? d.getContactNumber() : "-" %></td>
+                                        <td style="text-align: right;">
+                                            <button type="button" class="btn btn-secondary" style="padding: 4px 10px; font-size: 0.8rem; margin-right: 4px;" data-id="<%= d.getId() %>" data-name="<%= d.getDentistName() %>" data-spec="<%= d.getSpecialization() %>" data-contact="<%= d.getContactNumber() != null ? d.getContactNumber() : "" %>" onclick="handleEditDentist(this)">Edit</button>
+                                            <a href="dentists?action=delete&id=<%= d.getId() %>" class="btn btn-danger" style="padding: 4px 10px; font-size: 0.8rem;" onclick="return confirm('Delete dentist <%= d.getDentistName() %>?')">Delete</a>
+                                        </td>
                                     </tr>
-                                </thead>
-                                <tbody>
-                                    <% if (dentists != null && !dentists.isEmpty()) { for (Dentist d : dentists) { %>
-                                        <tr>
-                                            <td><%= d.getId() %></td>
-                                            <td style="font-weight: 600;"><%= d.getDentistName() %></td>
-                                            <td><%= d.getSpecialization() %></td>
-                                            <td><%= d.getContactNumber() != null ? d.getContactNumber() : "-" %></td>
-                                            <td style="text-align: right;">
-                                                <button type="button" class="btn btn-secondary" style="padding: 4px 10px; font-size: 0.8rem; border-color: rgba(56, 189, 248, 0.5); color: #38bdf8; margin-right: 4px;" data-id="<%= d.getId() %>" data-name="<%= d.getDentistName() %>" data-spec="<%= d.getSpecialization() %>" data-contact="<%= d.getContactNumber() != null ? d.getContactNumber() : "" %>" onclick="handleEditDentist(this)">Edit</button>
-                                                <a href="dentists?action=delete&id=<%= d.getId() %>" class="btn btn-secondary" style="padding: 4px 10px; font-size: 0.8rem; border-color: rgba(239, 68, 68, 0.5); color: #f87171;" onclick="return confirm('Delete dentist <%= d.getDentistName() %>?')">Delete</a>
-                                            </td>
-                                        </tr>
-                                    <% } } else { %>
-                                        <tr><td colspan="5" style="text-align: center; color: var(--text-muted);">No dentist records found.</td></tr>
-                                    <% } %>
-                                </tbody>
-                            </table>
-                        </div>
+                                <% } } else { %>
+                                    <tr><td colspan="5" style="text-align: center; color: #64748b;">No dentist records found.</td></tr>
+                                <% } %>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </section>
@@ -901,35 +928,40 @@
                         </div>
                     </form>
 
-                    <div style="margin-top: 2.5rem;">
-                        <h3 style="margin-bottom: 1rem; color: var(--color-primary);">Clinic Service Rates List</h3>
-                        <div style="overflow-x: auto; background: rgba(0, 0, 0, 0.2); border-radius: 12px; border: 1px solid var(--card-border);">
-                            <table class="report-table">
-                                <thead>
+                </div> <!-- End Treatment Form Card Panel -->
+
+                <!-- Separate Panel Card for Service Rates Table -->
+                <div class="panel" style="margin-top: 1.75rem;">
+                    <div class="panel-header">
+                        <h2 class="panel-title">Clinic Treatment Packages & Service Rates</h2>
+                        <p class="panel-subtitle">Active clinical treatment packages and current price rates</p>
+                    </div>
+                    <div style="overflow-x: auto; border-radius: 12px; border: 1px solid #e2e8f0;">
+                        <table class="report-table" style="margin-top: 0;">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Treatment Service Name</th>
+                                    <th style="text-align: right;">Service Cost (LKR)</th>
+                                    <th style="text-align: right;">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <% if (treatments != null && !treatments.isEmpty()) { for (Treatment t : treatments) { %>
                                     <tr>
-                                        <th>ID</th>
-                                        <th>Treatment Service Name</th>
-                                        <th style="text-align: right;">Service Cost (LKR)</th>
-                                        <th style="text-align: right;">Actions</th>
+                                        <td><%= t.getId() %></td>
+                                        <td style="font-weight: 600;"><%= t.getTreatmentName() %></td>
+                                        <td style="text-align: right;">LKR <%= String.format("%,.2f", t.getCost()) %></td>
+                                        <td style="text-align: right;">
+                                            <button type="button" class="btn btn-secondary" style="padding: 4px 10px; font-size: 0.8rem; margin-right: 4px;" data-id="<%= t.getId() %>" data-name="<%= t.getTreatmentName() %>" data-cost="<%= t.getCost() %>" onclick="handleEditTreatment(this)">Edit</button>
+                                            <a href="treatments?action=delete&id=<%= t.getId() %>" class="btn btn-danger" style="padding: 4px 10px; font-size: 0.8rem;" onclick="return confirm('Delete treatment <%= t.getTreatmentName() %>?')">Delete</a>
+                                        </td>
                                     </tr>
-                                </thead>
-                                <tbody>
-                                    <% if (treatments != null && !treatments.isEmpty()) { for (Treatment t : treatments) { %>
-                                        <tr>
-                                            <td><%= t.getId() %></td>
-                                            <td style="font-weight: 600;"><%= t.getTreatmentName() %></td>
-                                            <td style="text-align: right;">LKR <%= String.format("%,.2f", t.getCost()) %></td>
-                                            <td style="text-align: right;">
-                                                <button type="button" class="btn btn-secondary" style="padding: 4px 10px; font-size: 0.8rem; border-color: rgba(56, 189, 248, 0.5); color: #38bdf8; margin-right: 4px;" data-id="<%= t.getId() %>" data-name="<%= t.getTreatmentName() %>" data-cost="<%= t.getCost() %>" onclick="handleEditTreatment(this)">Edit</button>
-                                                <a href="treatments?action=delete&id=<%= t.getId() %>" class="btn btn-secondary" style="padding: 4px 10px; font-size: 0.8rem; border-color: rgba(239, 68, 68, 0.5); color: #f87171;" onclick="return confirm('Delete treatment <%= t.getTreatmentName() %>?')">Delete</a>
-                                            </td>
-                                        </tr>
-                                    <% } } else { %>
-                                        <tr><td colspan="4" style="text-align: center; color: var(--text-muted);">No treatment packages found.</td></tr>
-                                    <% } %>
-                                </tbody>
-                            </table>
-                        </div>
+                                <% } } else { %>
+                                    <tr><td colspan="4" style="text-align: center; color: #64748b;">No treatment packages found.</td></tr>
+                                <% } %>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </section>
@@ -943,56 +975,56 @@
                         <p class="panel-subtitle">Comprehensive user guides, workflows, and FAQs for staff and administrators</p>
                     </div>
 
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
-                        <div style="background: rgba(0,0,0,0.25); border: 1px solid var(--card-border); padding: 1.25rem; border-radius: 12px;">
-                            <h3 style="color: #38bdf8; margin-bottom: 0.5rem;">📅 Registering Appointments</h3>
-                            <p style="font-size: 0.9rem; color: var(--text-muted); line-height: 1.5;">
-                                1. Enter the patient's NIC or Passport number and click <strong>Verify Patient</strong>.<br>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
+                        <div style="background: #ffffff; border: 1px solid #e2e8f0; padding: 1.5rem; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.03);">
+                            <h3 style="color: #0284c7; margin-bottom: 0.75rem; font-size: 1.1rem; font-weight: 700;">📅 Registering Appointments</h3>
+                            <p style="font-size: 0.92rem; color: #334155; line-height: 1.6;">
+                                1. Enter the patient's NIC or Passport number and click <strong style="color: #0f172a;">Verify Patient</strong>.<br>
                                 2. If registered, the patient's details will auto-populate.<br>
-                                3. Select Dentist, Treatment Package, Date, and Time, then click <strong>Register Appointment</strong>.
+                                3. Select Dentist, Treatment Package, Date, and Time, then click <strong style="color: #0284c7;">Register Appointment</strong>.
                             </p>
                         </div>
 
-                        <div style="background: rgba(0,0,0,0.25); border: 1px solid var(--card-border); padding: 1.25rem; border-radius: 12px;">
-                            <h3 style="color: #4ade80; margin-bottom: 0.5rem;">👤 Patient Registration</h3>
-                            <p style="font-size: 0.9rem; color: var(--text-muted); line-height: 1.5;">
-                                1. Clinic staff or admins can add new patient profiles under <strong>Patient Registration</strong>.<br>
+                        <div style="background: #ffffff; border: 1px solid #e2e8f0; padding: 1.5rem; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.03);">
+                            <h3 style="color: #059669; margin-bottom: 0.75rem; font-size: 1.1rem; font-weight: 700;">👤 Patient Registration</h3>
+                            <p style="font-size: 0.92rem; color: #334155; line-height: 1.6;">
+                                1. Clinic staff or admins can add new patient profiles under <strong style="color: #0f172a;">Patient Registration</strong>.<br>
                                 2. Patient Name, NIC/Passport, and Contact Phone are required.<br>
                                 3. Existing profiles can be updated or deleted using table action buttons.
                             </p>
                         </div>
 
-                        <div style="background: rgba(0,0,0,0.25); border: 1px solid var(--card-border); padding: 1.25rem; border-radius: 12px;">
-                            <h3 style="color: #facc15; margin-bottom: 0.5rem;">🧾 Billing & Receipts</h3>
-                            <p style="font-size: 0.9rem; color: var(--text-muted); line-height: 1.5;">
-                                1. Go to <strong>Calculate & Bill</strong> tab.<br>
-                                2. Enter the Appointment Number (e.g. <code>APPT-1001</code>) and Doctor Consultation Fee.<br>
-                                3. Click <strong>Generate Payment Receipt</strong> to view and print the official receipt.
+                        <div style="background: #ffffff; border: 1px solid #e2e8f0; padding: 1.5rem; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.03);">
+                            <h3 style="color: #d97706; margin-bottom: 0.75rem; font-size: 1.1rem; font-weight: 700;">🧾 Billing & Receipts</h3>
+                            <p style="font-size: 0.92rem; color: #334155; line-height: 1.6;">
+                                1. Go to <strong style="color: #0f172a;">Calculate & Bill</strong> tab.<br>
+                                2. Enter the Appointment Number (e.g. <code style="background: #f1f5f9; padding: 2px 6px; border-radius: 4px; color: #0f172a;">APPT-1001</code>) and Doctor Consultation Fee.<br>
+                                3. Click <strong style="color: #d97706;">Generate Payment Receipt</strong> to view and print the official receipt.
                             </p>
                         </div>
 
                         <% if ("Admin".equals(role)) { %>
-                        <div style="background: rgba(0,0,0,0.25); border: 1px solid var(--card-border); padding: 1.25rem; border-radius: 12px;">
-                            <h3 style="color: #c084fc; margin-bottom: 0.5rem;">⚙️ Admin Controls</h3>
-                            <p style="font-size: 0.9rem; color: var(--text-muted); line-height: 1.5;">
-                                • <strong>User Management</strong>: Create, edit, or delete staff and admin user accounts.<br>
-                                • <strong>Dentist Management</strong>: Register consulting doctors and specializations.<br>
-                                • <strong>Treatment Packages</strong>: Manage clinic treatment offerings and pricing.
+                        <div style="background: #ffffff; border: 1px solid #e2e8f0; padding: 1.5rem; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.03);">
+                            <h3 style="color: #9333ea; margin-bottom: 0.75rem; font-size: 1.1rem; font-weight: 700;">⚙️ Admin Controls</h3>
+                            <p style="font-size: 0.92rem; color: #334155; line-height: 1.6;">
+                                • <strong style="color: #0f172a;">User Management</strong>: Create, edit, or delete staff and admin user accounts.<br>
+                                • <strong style="color: #0f172a;">Dentist Management</strong>: Register consulting doctors and specializations.<br>
+                                • <strong style="color: #0f172a;">Treatment Packages</strong>: Manage clinic treatment offerings and pricing.
                             </p>
                         </div>
                         <% } %>
                     </div>
 
-                    <div style="background: rgba(15, 23, 42, 0.6); border: 1px solid var(--card-border); padding: 1.5rem; border-radius: 12px;">
-                        <h3 style="color: var(--color-primary); margin-bottom: 0.75rem;">❓ Frequently Asked Questions (FAQ)</h3>
-                        <div style="display: flex; flex-direction: column; gap: 1rem; font-size: 0.9rem;">
-                            <div>
-                                <strong style="color: #fff;">Q: Can unregistered patients book appointments?</strong>
-                                <p style="color: var(--text-muted); margin-top: 2px;">A: No. Patients must first be registered under Patient Registration using a valid NIC or Passport number.</p>
+                    <div style="background: #f8fafc; border: 1px solid #e2e8f0; padding: 1.75rem; border-radius: 16px;">
+                        <h3 style="color: #0284c7; margin-bottom: 1rem; font-size: 1.2rem; font-weight: 700;">❓ Frequently Asked Questions (FAQ)</h3>
+                        <div style="display: flex; flex-direction: column; gap: 1.25rem; font-size: 0.92rem;">
+                            <div style="border-bottom: 1px solid #e2e8f0; padding-bottom: 1rem;">
+                                <strong style="color: #0f172a; font-size: 0.95rem; display: block; margin-bottom: 0.25rem;">Q: Can unregistered patients book appointments?</strong>
+                                <p style="color: #475569; margin: 0;">A: No. Patients must first be registered under Patient Registration using a valid NIC or Passport number.</p>
                             </div>
                             <div>
-                                <strong style="color: #fff;">Q: How do I change an appointment status to Completed or Cancelled?</strong>
-                                <p style="color: var(--text-muted); margin-top: 2px;">A: Navigate to <strong>Search Details</strong> directory and click the <em>Complete</em> or <em>Cancel</em> action button next to the schedule.</p>
+                                <strong style="color: #0f172a; font-size: 0.95rem; display: block; margin-bottom: 0.25rem;">Q: How do I change an appointment status to Completed or Cancelled?</strong>
+                                <p style="color: #475569; margin: 0;">A: Navigate to <strong>Search Details</strong> directory and click the <em>Complete</em> or <em>Cancel</em> action button next to the schedule.</p>
                             </div>
                         </div>
                     </div>
@@ -1002,6 +1034,11 @@
         </main>
     </div>
 
-    <script src="js/app.js?v=8"></script>
+    <!-- Floating Back to Top Scroll Button -->
+    <button id="btn-scroll-top" onclick="window.scrollTo({top: 0, behavior: 'smooth'});" title="Scroll to top" style="position: fixed; bottom: 30px; right: 30px; background: linear-gradient(135deg, #0284c7, #06b6d4); color: #ffffff; border: none; width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.25rem; cursor: pointer; box-shadow: 0 10px 25px rgba(2, 132, 199, 0.4); transition: all 0.3s ease; z-index: 9999;">
+        ⬆
+    </button>
+
+    <script src="js/app.js?v=9"></script>
 </body>
 </html>

@@ -20,7 +20,7 @@
                 <span class="logo-icon">🦷</span>
                 <span class="logo-text">Sunrise Dental</span>
             </div>
-            <h1 class="login-title">Staff Portal (Traditional MVC)</h1>
+            <h1 class="login-title">Staff & Admin Portal</h1>
             <p class="login-subtitle">Please enter your credentials to login</p>
         </div>
 

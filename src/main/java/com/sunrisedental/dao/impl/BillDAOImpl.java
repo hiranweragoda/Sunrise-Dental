@@ -53,6 +53,15 @@ public class BillDAOImpl implements BillDAO {
                     ex.printStackTrace();
                 }
 
+                // Automatically update appointment status to 'Completed' upon bill generation & payment
+                String updateApptSql = "UPDATE appointments SET status = 'Completed' WHERE appointment_number = ?";
+                try (PreparedStatement apptPs = conn.prepareStatement(updateApptSql)) {
+                    apptPs.setString(1, appointmentNumber);
+                    apptPs.executeUpdate();
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+
                 Bill bill = getBillByAppointmentNumber(appointmentNumber);
                 if (bill != null) {
                     bill.setPaymentMethod(paymentMethod != null ? paymentMethod : "Cash");
@@ -109,22 +118,42 @@ public class BillDAOImpl implements BillDAO {
 
     @Override
     public Map<String, Object> getFinancialSummary() {
-        Map<String, Object> summary = new HashMap<>();
-        String sql = "SELECT COUNT(*) as total_bills, SUM(total_cost) as total_revenue, SUM(consultation_fee) as total_consultation_fees FROM bills";
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
+        return getFinancialSummary(null, null);
+    }
 
-            if (rs.next()) {
-                summary.put("total_bills", rs.getInt("total_bills"));
-                BigDecimal revenue = rs.getBigDecimal("total_revenue");
-                summary.put("total_revenue", revenue != null ? revenue : BigDecimal.ZERO);
-                BigDecimal fees = rs.getBigDecimal("total_consultation_fees");
-                summary.put("total_consultation_fees", fees != null ? fees : BigDecimal.ZERO);
-            } else {
-                summary.put("total_bills", 0);
-                summary.put("total_revenue", BigDecimal.ZERO);
-                summary.put("total_consultation_fees", BigDecimal.ZERO);
+    @Override
+    public Map<String, Object> getFinancialSummary(String filterDate, String filterMonth) {
+        Map<String, Object> summary = new HashMap<>();
+        StringBuilder sql = new StringBuilder("SELECT COUNT(*) as total_bills, SUM(total_cost) as total_revenue, SUM(consultation_fee) as total_consultation_fees FROM bills WHERE 1=1");
+
+        if (filterDate != null && !filterDate.trim().isEmpty()) {
+            sql.append(" AND DATE(bill_date) = ?");
+        } else if (filterMonth != null && !filterMonth.trim().isEmpty()) {
+            sql.append(" AND DATE_FORMAT(bill_date, '%Y-%m') = ?");
+        }
+
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+
+            int paramIdx = 1;
+            if (filterDate != null && !filterDate.trim().isEmpty()) {
+                ps.setDate(paramIdx++, java.sql.Date.valueOf(filterDate));
+            } else if (filterMonth != null && !filterMonth.trim().isEmpty()) {
+                ps.setString(paramIdx++, filterMonth);
+            }
+
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    summary.put("total_bills", rs.getInt("total_bills"));
+                    BigDecimal revenue = rs.getBigDecimal("total_revenue");
+                    summary.put("total_revenue", revenue != null ? revenue : BigDecimal.ZERO);
+                    BigDecimal fees = rs.getBigDecimal("total_consultation_fees");
+                    summary.put("total_consultation_fees", fees != null ? fees : BigDecimal.ZERO);
+                } else {
+                    summary.put("total_bills", 0);
+                    summary.put("total_revenue", BigDecimal.ZERO);
+                    summary.put("total_consultation_fees", BigDecimal.ZERO);
+                }
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -137,24 +166,49 @@ public class BillDAOImpl implements BillDAO {
 
     @Override
     public List<Map<String, Object>> getTreatmentRevenueReport() {
-        List<Map<String, Object>> list = new ArrayList<>();
-        String sql = "SELECT t.treatment_name, COUNT(a.appointment_number) as appointment_count, SUM(b.total_cost) as total_earnings " +
-                     "FROM treatments t " +
-                     "LEFT JOIN appointments a ON t.id = a.treatment_id " +
-                     "LEFT JOIN bills b ON a.appointment_number = b.appointment_number " +
-                     "GROUP BY t.id, t.treatment_name " +
-                     "ORDER BY total_earnings DESC";
-        try (Connection conn = DBConnection.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
+        return getTreatmentRevenueReport(null, null);
+    }
 
-            while (rs.next()) {
-                Map<String, Object> map = new HashMap<>();
-                map.put("treatment_name", rs.getString("treatment_name"));
-                map.put("appointment_count", rs.getInt("appointment_count"));
-                BigDecimal earnings = rs.getBigDecimal("total_earnings");
-                map.put("total_earnings", earnings != null ? earnings : BigDecimal.ZERO);
-                list.add(map);
+    @Override
+    public List<Map<String, Object>> getTreatmentRevenueReport(String filterDate, String filterMonth) {
+        List<Map<String, Object>> list = new ArrayList<>();
+        StringBuilder sql = new StringBuilder(
+            "SELECT t.treatment_name, COUNT(a.appointment_number) as appointment_count, SUM(b.total_cost) as total_earnings " +
+            "FROM treatments t " +
+            "LEFT JOIN appointments a ON t.id = a.treatment_id "
+        );
+
+        if (filterDate != null && !filterDate.trim().isEmpty()) {
+            sql.append(" AND a.appointment_date = ? ");
+        } else if (filterMonth != null && !filterMonth.trim().isEmpty()) {
+            sql.append(" AND DATE_FORMAT(a.appointment_date, '%Y-%m') = ? ");
+        }
+
+        sql.append(
+            "LEFT JOIN bills b ON a.appointment_number = b.appointment_number " +
+            "GROUP BY t.id, t.treatment_name " +
+            "ORDER BY total_earnings DESC"
+        );
+
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql.toString())) {
+
+            int paramIdx = 1;
+            if (filterDate != null && !filterDate.trim().isEmpty()) {
+                ps.setDate(paramIdx++, java.sql.Date.valueOf(filterDate));
+            } else if (filterMonth != null && !filterMonth.trim().isEmpty()) {
+                ps.setString(paramIdx++, filterMonth);
+            }
+
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Map<String, Object> map = new HashMap<>();
+                    map.put("treatment_name", rs.getString("treatment_name"));
+                    map.put("appointment_count", rs.getInt("appointment_count"));
+                    BigDecimal earnings = rs.getBigDecimal("total_earnings");
+                    map.put("total_earnings", earnings != null ? earnings : BigDecimal.ZERO);
+                    list.add(map);
+                }
             }
         } catch (Exception e) {
             e.printStackTrace();
