@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sunrise Dental Clinic - Use Case Diagram</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8fafc;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 2rem;
+            margin: 0;
+        }
+        .card {
+            background: #ffffff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 2.5rem;
+            max-width: 900px;
+            width: 100%;
+            text-align: center;
+        }
+        h1 {
+            color: #0f172a;
+            margin-bottom: 0.5rem;
+        }
+        p {
+            color: #64748b;
+            margin-bottom: 2rem;
+        }
+        .mermaid {
+            display: flex;
+            justify-content: center;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <h1>🏥 Sunrise Dental Clinic Management System</h1>
+        <p>Official System Use Case Diagram (Staff vs Administrator Workflows)</p>
+        
+        <div class="mermaid">
+graph LR
+    %% Actors
+    Staff["👤 Staff"]
+    Admin["👨‍💼 Admin"]
+
+    %% Red System Boundary Box matching user example
+    subgraph SystemBoundary ["Sunrise Dental Clinic Management System"]
+        style SystemBoundary fill:#fee2e2,stroke:#ef4444,stroke-width:2px,color:#991b1b
+        
+        UC1(("System Login"))
+        UC2(("Register Patient Profile"))
+        UC3(("Verify & Search Patients"))
+        UC4(("Register New Appointment"))
+        UC5(("View Appointments Directory"))
+        UC6(("Calculate & Print Bill"))
+        UC7(("Help Section & Guidelines"))
+        UC8(("Manage System Users"))
+        UC9(("Manage Dentists & Rates"))
+        UC10(("Manage Treatment Packages"))
+        UC11(("View Analytics & Export CSV"))
+        UC12(("System Logout"))
+        
+        style UC1 fill:#dbeafe,stroke:#2563eb,stroke-width:1.5px
+        style UC2 fill:#dbeafe,stroke:#2563eb,stroke-width:1.5px
+        style UC3 fill:#dbeafe,stroke:#2563eb,stroke-width:1.5px
+        style UC4 fill:#dbeafe,stroke:#2563eb,stroke-width:1.5px
+        style UC5 fill:#dbeafe,stroke:#2563eb,stroke-width:1.5px
+        style UC6 fill:#dbeafe,stroke:#2563eb,stroke-width:1.5px
+        style UC7 fill:#dbeafe,stroke:#2563eb,stroke-width:1.5px
+        style UC8 fill:#dbeafe,stroke:#2563eb,stroke-width:1.5px
+        style UC9 fill:#dbeafe,stroke:#2563eb,stroke-width:1.5px
+        style UC10 fill:#dbeafe,stroke:#2563eb,stroke-width:1.5px
+        style UC11 fill:#dbeafe,stroke:#2563eb,stroke-width:1.5px
+        style UC12 fill:#dbeafe,stroke:#2563eb,stroke-width:1.5px
+    end
+
+    %% Staff Connections (Left side)
+    Staff --> UC1
+    Staff --> UC2
+    Staff --> UC3
+    Staff --> UC4
+    Staff --> UC5
+    Staff --> UC6
+    Staff --> UC7
+    Staff --> UC12
+
+    %% Admin Connections (Right side)
+    Admin --> UC1
+    Admin --> UC2
+    Admin --> UC3
+    Admin --> UC4
+    Admin --> UC5
+    Admin --> UC6
+    Admin --> UC7
+    Admin --> UC8
+    Admin --> UC9
+    Admin --> UC10
+    Admin --> UC11
+    Admin --> UC12
+        </div>
+    </div>
+
+    <script>
+        mermaid.initialize({ startOnLoad: true, theme: 'default' });
+    </script>
+</body>
+</html>

@@ -17,7 +17,15 @@
     String role = currentUser.getRole();
     String activeTab = request.getParameter("tab");
     if (activeTab == null || activeTab.trim().isEmpty()) {
-        activeTab = "tab-register";
+        if ("Admin".equalsIgnoreCase(role)) {
+            activeTab = "tab-search";
+        } else {
+            activeTab = "tab-register";
+        }
+    }
+
+    if ("Admin".equalsIgnoreCase(role) && ("tab-register".equals(activeTab) || "tab-patients".equals(activeTab) || "tab-billing".equals(activeTab))) {
+        activeTab = "tab-search";
     }
 
     List<Patient> patients = (List<Patient>) request.getAttribute("patients");
@@ -97,6 +105,7 @@
     <div class="main-wrapper">
         <!-- Sidebar Navigation -->
         <aside class="sidebar">
+            <% if (!"Admin".equalsIgnoreCase(role)) { %>
             <a href="dashboard?tab=tab-register" onclick="switchTab('tab-register'); return false;" id="nav-tab-register" class="nav-item <%= "tab-register".equals(activeTab) ? "active" : "" %>">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
@@ -109,18 +118,21 @@
                 </svg>
                 <span>Patient Registration</span>
             </a>
+            <% } %>
             <a href="dashboard?tab=tab-search" onclick="switchTab('tab-search'); return false;" id="nav-tab-search" class="nav-item <%= "tab-search".equals(activeTab) ? "active" : "" %>">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
                 <span>Search Details</span>
             </a>
+            <% if (!"Admin".equalsIgnoreCase(role)) { %>
             <a href="dashboard?tab=tab-billing" onclick="switchTab('tab-billing'); return false;" id="nav-tab-billing" class="nav-item <%= "tab-billing".equals(activeTab) ? "active" : "" %>">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
                 </svg>
                 <span>Calculate & Bill</span>
             </a>
+            <% } %>
             <% if ("Admin".equals(role)) { %>
             <a href="dashboard?tab=tab-users" onclick="switchTab('tab-users'); return false;" id="nav-tab-users" class="nav-item <%= "tab-users".equals(activeTab) ? "active" : "" %>">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -179,6 +191,7 @@
             <% } %>
 
             <!-- TAB 1: REGISTER APPOINTMENT -->
+            <% if (!"Admin".equalsIgnoreCase(role)) { %>
             <section id="tab-register" class="tab-content <%= "tab-register".equals(activeTab) ? "active" : "" %>">
                 <div class="panel">
                     <div class="panel-header">
@@ -266,8 +279,10 @@
                     </form>
                 </div>
             </section>
+            <% } %>
 
-            <!-- TAB 2: PATIENT MANAGEMENT (STAFF & ADMIN) -->
+            <!-- TAB 2: PATIENT MANAGEMENT (STAFF ONLY) -->
+            <% if (!"Admin".equalsIgnoreCase(role)) { %>
             <section id="tab-patients" class="tab-content <%= "tab-patients".equals(activeTab) ? "active" : "" %>">
                 <div class="panel">
                     <div class="panel-header">
@@ -342,6 +357,7 @@
                     </div>
                 </div>
             </section>
+            <% } %>
 
             <!-- TAB 3: SEARCH DETAILS & APPOINTMENT SEARCH -->
             <section id="tab-search" class="tab-content <%= "tab-search".equals(activeTab) ? "active" : "" %>">
@@ -520,6 +536,7 @@
             </section>
 
             <!-- TAB 4: CALCULATE & BILL -->
+            <% if (!"Admin".equalsIgnoreCase(role)) { %>
             <section id="tab-billing" class="tab-content <%= "tab-billing".equals(activeTab) ? "active" : "" %>">
                 <div class="panel">
                     <div class="panel-header">
@@ -737,6 +754,7 @@
                     </div>
                 </div>
             </section>
+            <% } %>
 
             <% if ("Admin".equals(role)) { %>
             <!-- TAB: USER MANAGEMENT (ADMIN ONLY) -->
