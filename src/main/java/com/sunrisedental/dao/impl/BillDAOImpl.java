@@ -36,7 +36,6 @@ public class BillDAOImpl implements BillDAO {
             cs.execute();
 
             int billId = cs.getInt(3);
-            BigDecimal totalAmount = cs.getBigDecimal(4);
 
             if (billId > 0) {
                 // Update payment method details directly in bills table

@@ -1,6 +1,5 @@
 package com.sunrisedental.controller;
 
-import com.google.gson.Gson;
 import com.sunrisedental.dao.TreatmentDAO;
 import com.sunrisedental.dao.impl.TreatmentDAOImpl;
 import com.sunrisedental.model.Treatment;
@@ -14,12 +13,10 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.util.List;
 
-@WebServlet(urlPatterns = {"/treatments", "/api/treatments", "/api/treatments/*"})
+@WebServlet("/treatments")
 public class TreatmentServlet extends HttpServlet {
     private final TreatmentDAO treatmentDAO = new TreatmentDAOImpl();
-    private final Gson gson = new Gson();
 
     private boolean isAdmin(HttpServletRequest req) {
         HttpSession session = req.getSession(false);
