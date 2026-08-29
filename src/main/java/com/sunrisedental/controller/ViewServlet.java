@@ -103,7 +103,7 @@ public class ViewServlet extends HttpServlet {
             if (!isLoggedIn) {
                 resp.sendRedirect(req.getContextPath() + "/login");
             } else {
-                req.getRequestDispatcher("/reports.jsp").forward(req, resp);
+                resp.sendRedirect(req.getContextPath() + "/dashboard?tab=tab-reports");
             }
         } else if ("/receipt".equals(path)) {
             if (!isLoggedIn) {

@@ -1,6 +1,8 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ page import="com.sunrisedental.model.*" %>
-<%@ page import="java.util.List" %>
+<%@ page import="com.sunrisedental.dao.*" %>
+<%@ page import="com.sunrisedental.dao.impl.*" %>
+<%@ page import="java.util.*" %>
 <%
     response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
     response.setHeader("Pragma", "no-cache");
@@ -42,6 +44,25 @@
     
     String enteredNic = request.getParameter("nic");
     if (enteredNic == null && verifiedPatient != null) enteredNic = verifiedPatient.getNicPassport();
+
+    // Data for integrated Analytics & Reports tab
+    String filterDate = request.getParameter("filter_date");
+    String filterMonth = request.getParameter("filter_month");
+
+    AppointmentDAO reportApptDAO = new AppointmentDAOImpl();
+    BillDAO reportBillDAO = new BillDAOImpl();
+
+    Map<String, Integer> apptCounts = reportApptDAO.getAppointmentCounts(filterDate, filterMonth);
+    List<Map<String, Object>> dentistStats = reportApptDAO.getDentistStatistics(filterDate, filterMonth);
+    Map<String, Object> financialSummary = reportBillDAO.getFinancialSummary(filterDate, filterMonth);
+    List<Map<String, Object>> treatmentReport = reportBillDAO.getTreatmentRevenueReport(filterDate, filterMonth);
+
+    String activeFilterLabel = "All Time Record Summary";
+    if (filterDate != null && !filterDate.trim().isEmpty()) {
+        activeFilterLabel = "Filtered Date: " + filterDate;
+    } else if (filterMonth != null && !filterMonth.trim().isEmpty()) {
+        activeFilterLabel = "Filtered Month: " + filterMonth;
+    }
 %>
 <!DOCTYPE html>
 <html lang="en">
@@ -50,8 +71,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard - Sunrise Dental Management (MVC)</title>
     <link rel="stylesheet" href="css/style.css?v=8">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         .highlight-row { background: rgba(56, 189, 248, 0.15) !important; }
+        .chart-print-img { display: none; }
     </style>
 </head>
 <body class="dashboard-body">
@@ -117,7 +140,7 @@
                 </svg>
                 <span>Treatment Packages</span>
             </a>
-            <a href="reports" class="nav-item">
+            <a href="dashboard?tab=tab-reports" onclick="switchTab('tab-reports'); return false;" id="nav-tab-reports" class="nav-item <%= "tab-reports".equals(activeTab) ? "active" : "" %>">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                 </svg>
@@ -163,14 +186,14 @@
                         <p class="panel-subtitle">Create a new patient checkup schedule</p>
                     </div>
 
-                    <!-- Step 1: NIC Search Form -->
+                    <!-- Step 1: Patient Search / Verification Form -->
                     <form action="dashboard" method="GET" style="margin-bottom: 1.5rem;">
                         <input type="hidden" name="tab" value="tab-register">
                         <div class="form-group full-width">
-                            <label for="search_patient_nic">Patient NIC / Passport Number <span style="font-weight: 500; font-size: 0.8rem; color: #0284c7;">(Enter NIC or Passport and click Verify Patient)</span></label>
+                            <label for="search_patient_nic">Patient ID / Phone / Name <span style="font-weight: 500; font-size: 0.8rem; color: #0284c7;">(Enter Patient ID e.g. PAT-0001, Phone Number, or Name and click Verify Patient)</span></label>
                             <div style="display: flex; gap: 10px;">
-                                <input type="text" id="search_patient_nic" name="nic" value="<%= enteredNic != null ? enteredNic : "" %>" placeholder="e.g. 199512345678 or N1234567" required style="flex: 1;">
-                                <button type="submit" class="btn btn-secondary">Verify Patient</button>
+                                <input type="text" id="search_patient_nic" name="nic" value="<%= enteredNic != null ? enteredNic : "" %>" placeholder="e.g. PAT-0001 or 0771234567" required style="flex: 1;">
+                                <button type="submit" class="btn btn-secondary">🔍 Verify Patient</button>
                             </div>
                             <% if (verifySuccess != null) { %>
                                 <small style="display: block; margin-top: 6px; font-size: 0.85rem; font-weight: 500; color: #16a34a;"><%= verifySuccess %></small>
@@ -249,20 +272,16 @@
                 <div class="panel">
                     <div class="panel-header">
                         <h2 class="panel-title">Patient Profile Registration & Management</h2>
-                        <p class="panel-subtitle">Register new patients with NIC/Passport details, edit records, or remove patient profiles</p>
+                        <p class="panel-subtitle">Register new patients easily (Auto-generates unique Patient ID number for adults & children)</p>
                     </div>
 
                     <form action="patients" method="POST">
                         <input type="hidden" id="patient-id" name="id" value="0">
+                        <input type="hidden" id="patient-nic-input" name="nic_passport" value="">
                         <div class="form-grid">
                             <div class="form-group">
                                 <label for="patient-name-input">Patient Full Name</label>
-                                <input type="text" id="patient-name-input" name="patient_name" placeholder="e.g. Nimal Perera" required minlength="3">
-                            </div>
-
-                            <div class="form-group">
-                                <label for="patient-nic-input">NIC / Passport Number</label>
-                                <input type="text" id="patient-nic-input" name="nic_passport" placeholder="e.g. 199512345678 or N1234567" required minlength="5">
+                                <input type="text" id="patient-name-input" name="patient_name" placeholder="e.g. Nimal Perera or Little Kasun" required minlength="3">
                             </div>
 
                             <div class="form-group">
@@ -270,7 +289,7 @@
                                 <input type="tel" id="patient-phone-input" name="phone_number" placeholder="e.g. 0771234567" required>
                             </div>
 
-                            <div class="form-group">
+                            <div class="form-group full-width">
                                 <label for="patient-address-input">Residential Address</label>
                                 <input type="text" id="patient-address-input" name="address" placeholder="e.g. 45 Temple Road, Nugegoda">
                             </div>
@@ -288,31 +307,31 @@
                 <div class="panel" style="margin-top: 1.75rem;">
                     <div class="panel-header">
                         <h2 class="panel-title">Registered Clinic Patients Directory</h2>
-                        <p class="panel-subtitle">Complete list of registered clinic patients, NIC numbers, and contact details</p>
+                        <p class="panel-subtitle">Complete list of registered clinic patients, auto-generated Patient IDs, and contact details</p>
                     </div>
-                    <div style="overflow-x: auto; border-radius: 12px; border: 1px solid #e2e8f0;">
+                    <div class="table-scroll-container">
                         <table class="report-table" style="margin-top: 0;">
                             <thead>
                                 <tr>
-                                    <th>ID</th>
+                                    <th>Patient ID</th>
                                     <th>Patient Name</th>
-                                    <th>NIC / Passport</th>
                                     <th>Contact Phone</th>
                                     <th>Address</th>
                                     <th style="text-align: right;">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                <% if (patients != null && !patients.isEmpty()) { for (Patient p : patients) { %>
+                                <% if (patients != null && !patients.isEmpty()) { for (Patient p : patients) { 
+                                    String pID = (p.getNicPassport() != null && !p.getNicPassport().trim().isEmpty()) ? p.getNicPassport().trim() : String.format("PAT-%04d", p.getId());
+                                %>
                                     <tr>
-                                        <td><%= p.getId() %></td>
+                                        <td><span class="status-pill status-scheduled" style="font-size: 0.85rem; padding: 4px 10px; font-weight: 800;"><%= pID %></span></td>
                                         <td style="font-weight: 600;"><%= p.getPatientName() %></td>
-                                        <td><span style="font-family: monospace; background: #f1f5f9; color: #0f172a; padding: 2px 8px; border-radius: 4px; font-weight: 600;"><%= p.getNicPassport() %></span></td>
                                         <td><%= p.getPhoneNumber() %></td>
                                         <td><%= p.getAddress() != null ? p.getAddress() : "-" %></td>
-                                        <td style="text-align: right;">
-                                            <button type="button" class="btn btn-secondary" style="padding: 4px 10px; font-size: 0.8rem; margin-right: 4px;" data-id="<%= p.getId() %>" data-name="<%= p.getPatientName() %>" data-nic="<%= p.getNicPassport() %>" data-phone="<%= p.getPhoneNumber() %>" data-address="<%= p.getAddress() != null ? p.getAddress() : "" %>" onclick="handleEditPatient(this)">Edit</button>
-                                            <a href="patients?action=delete&id=<%= p.getId() %>" class="btn btn-danger" style="padding: 4px 10px; font-size: 0.8rem;" onclick="return confirm('Delete patient <%= p.getPatientName() %>?')">Delete</a>
+                                        <td style="text-align: right; white-space: nowrap;">
+                                            <button type="button" class="btn btn-secondary" style="padding: 5px 12px; font-size: 0.82rem; margin-right: 6px; font-weight: 600;" data-id="<%= p.getId() %>" data-name="<%= p.getPatientName() %>" data-nic="<%= pID %>" data-phone="<%= p.getPhoneNumber() %>" data-address="<%= p.getAddress() != null ? p.getAddress() : "" %>" onclick="handleEditPatient(this)">✏️ Edit</button>
+                                            <a href="patients?action=delete&id=<%= p.getId() %>" class="btn btn-danger" style="padding: 5px 12px; font-size: 0.82rem; font-weight: 700; text-decoration: none;" onclick="return confirm('Delete patient <%= p.getPatientName() %>?')">🗑️ Delete</a>
                                         </td>
                                     </tr>
                                 <% } } else { %>
@@ -340,6 +359,7 @@
                             <div style="display: flex; gap: 10px;">
                                 <input type="text" id="search_appt_num" name="search_appt_num" value="<%= enteredApptNum != null ? enteredApptNum : "" %>" placeholder="e.g. APPT-1001 or APT-76201" required style="flex: 1;">
                                 <button type="submit" class="btn btn-primary">Search Appointment</button>
+                                <a href="dashboard?tab=tab-search" class="btn btn-secondary" style="font-weight: 600; text-decoration: none !important;">🔄 Clear</a>
                             </div>
                             <% if (searchSuccess != null) { %>
                                 <small style="display: block; margin-top: 6px; font-size: 0.85rem; font-weight: 500; color: #4ade80;"><%= searchSuccess %></small>
@@ -375,7 +395,7 @@
                                 </div>
                                 <div>
                                     <strong style="color: #64748b; font-size: 0.75rem; font-weight: 700; display: block; letter-spacing: 0.5px;">CONSULTING DENTIST</strong>
-                                    <span style="font-weight: 700; font-size: 1.05rem; color: #0284c7;"><%= searchedAppointment.getDentistName() %></span>
+                                    <span style="font-weight: 700; color: #0284c7;"><%= searchedAppointment.getDentistName() %></span>
                                 </div>
                                 <div>
                                     <strong style="color: #64748b; font-size: 0.75rem; font-weight: 700; display: block; letter-spacing: 0.5px;">TREATMENT SERVICE</strong>
@@ -394,7 +414,7 @@
                             <div style="margin-top: 1.5rem; border-top: 1px solid #e2e8f0; padding-top: 1.25rem; display: flex; gap: 12px; flex-wrap: wrap;">
                                 <button type="button" onclick="toggleApptUpdateForm()" class="btn btn-primary" style="padding: 10px 20px; font-weight: 700;">✏️ Update Appointment</button>
                                 <% if (!"Cancelled".equals(searchedAppointment.getStatus())) { %>
-                                    <a href="appointments?action=updateStatus&appointment_number=<%= searchedAppointment.getAppointmentNumber() %>&status=Cancelled" class="btn btn-danger" style="padding: 10px 20px; font-weight: 700;" onclick="return confirm('Cancel appointment <%= searchedAppointment.getAppointmentNumber() %>?')">Cancel Appointment</a>
+                                    <a href="appointments?action=updateStatus&appointment_number=<%= searchedAppointment.getAppointmentNumber() %>&status=Cancelled" class="btn btn-danger" style="padding: 10px 20px; font-weight: 700; text-decoration: none !important;" onclick="return confirm('Cancel appointment <%= searchedAppointment.getAppointmentNumber() %>?')">🚫 Cancel Appointment</a>
                                 <% } %>
                             </div>
 
@@ -459,7 +479,7 @@
                         <h2 class="panel-title">Appointments Directory & Schedules</h2>
                         <p class="panel-subtitle">View all registered patient appointments, current status, and actions</p>
                     </div>
-                    <div style="overflow-x: auto; border-radius: 12px; border: 1px solid #e2e8f0;">
+                    <div class="table-scroll-container">
                         <table class="report-table" style="margin-top: 0;">
                             <thead>
                                 <tr>
@@ -483,10 +503,10 @@
                                         <td><%= a.getDentistName() %></td>
                                         <td><%= a.getAppointmentDate() %> @ <%= a.getAppointmentTime() %></td>
                                         <td><span class="status-pill status-<%= a.getStatus().toLowerCase() %>"><%= a.getStatus() %></span></td>
-                                        <td style="text-align: right;">
-                                            <a href="dashboard?tab=tab-search&search_appt_num=<%= a.getAppointmentNumber() %>" class="btn btn-secondary" style="padding: 4px 10px; font-size: 0.8rem; margin-right: 4px;">Update</a>
+                                        <td style="text-align: right; white-space: nowrap;">
+                                            <a href="dashboard?tab=tab-search&search_appt_num=<%= a.getAppointmentNumber() %>" class="btn btn-secondary" style="padding: 5px 12px; font-size: 0.82rem; margin-right: 6px; font-weight: 600; text-decoration: none;">✏️ Update</a>
                                             <% if (!"Cancelled".equals(a.getStatus())) { %>
-                                                <a href="appointments?action=updateStatus&appointment_number=<%= a.getAppointmentNumber() %>&status=Cancelled" class="btn btn-danger" style="padding: 4px 10px; font-size: 0.8rem;" onclick="return confirm('Cancel appointment <%= a.getAppointmentNumber() %>?')">Cancel</a>
+                                                <a href="appointments?action=updateStatus&appointment_number=<%= a.getAppointmentNumber() %>&status=Cancelled" class="btn btn-danger" style="padding: 5px 12px; font-size: 0.82rem; font-weight: 700; text-decoration: none;" onclick="return confirm('Cancel appointment <%= a.getAppointmentNumber() %>?')">🚫 Cancel</a>
                                             <% } %>
                                         </td>
                                     </tr>
@@ -515,6 +535,7 @@
                             <div style="display: flex; gap: 10px;">
                                 <input type="text" id="bill_appt_num" name="bill_appt_num" value="<%= enteredBillApptNum != null ? enteredBillApptNum : "" %>" placeholder="e.g. APPT-1001" required style="flex: 1;">
                                 <button type="submit" class="btn btn-primary">Lookup Appointment</button>
+                                <a href="dashboard?tab=tab-billing" class="btn btn-secondary" style="font-weight: 600; text-decoration: none !important;">🔄 Clear</a>
                             </div>
                             <% if (billApptError != null) { %>
                                 <small style="display: block; margin-top: 6px; font-size: 0.85rem; font-weight: 500; color: #f87171;"><%= billApptError %></small>
@@ -658,7 +679,6 @@
 
                                 <div class="form-actions" style="margin-top: 1.5rem; display: flex; gap: 10px; flex-wrap: wrap;">
                                     <button type="submit" id="btn-submit-payment" class="btn btn-primary" style="background: #16a34a; border-color: #16a34a; font-weight: 700; font-size: 1rem; padding: 10px 20px;">💳 Generate Payment Receipt & Mark as Paid</button>
-                                    <a href="dashboard?tab=tab-billing" class="btn btn-secondary" style="font-weight: 600;">Select Another Patient</a>
                                 </div>
                             </form>
                         </div>
@@ -672,7 +692,7 @@
                         <h2 class="panel-title">Appointments Billing Directory</h2>
                         <p class="panel-subtitle">Select an appointment from the table below to process payment or view bill details</p>
                     </div>
-                    <div style="overflow-x: auto; border-radius: 12px; border: 1px solid #e2e8f0;">
+                    <div class="table-scroll-container">
                         <table class="report-table" style="margin-top: 0;">
                             <thead>
                                 <tr>
@@ -705,8 +725,8 @@
                                                 <span class="status-pill status-unpaid">⚠️ Unpaid</span>
                                             <% } %>
                                         </td>
-                                        <td style="text-align: right;">
-                                            <a href="dashboard?tab=tab-billing&bill_appt_num=<%= a.getAppointmentNumber() %>" class="btn btn-primary" style="padding: 6px 14px; font-size: 0.85rem;">Calculate & Bill</a>
+                                        <td style="text-align: right; white-space: nowrap;">
+                                            <a href="dashboard?tab=tab-billing&bill_appt_num=<%= a.getAppointmentNumber() %>" class="btn btn-primary" style="padding: 6px 14px; font-size: 0.85rem; font-weight: 700; text-decoration: none;">Calculate & Bill</a>
                                         </td>
                                     </tr>
                                 <% } } else { %>
@@ -773,7 +793,7 @@
                         <h2 class="panel-title">System Users Directory</h2>
                         <p class="panel-subtitle">Registered system administrator and clinical staff user accounts</p>
                     </div>
-                    <div style="overflow-x: auto; border-radius: 12px; border: 1px solid #e2e8f0;">
+                    <div class="table-scroll-container">
                         <table class="report-table" style="margin-top: 0;">
                             <thead>
                                 <tr>
@@ -791,9 +811,9 @@
                                         <td style="font-weight: 600;"><%= u.getUsername() %></td>
                                         <td><%= u.getFullName() %></td>
                                         <td><span class="status-pill status-scheduled"><%= u.getRole() %></span></td>
-                                        <td style="text-align: right;">
-                                            <button type="button" class="btn btn-secondary" style="padding: 4px 10px; font-size: 0.8rem; margin-right: 4px;" data-id="<%= u.getId() %>" data-username="<%= u.getUsername() %>" data-fullname="<%= u.getFullName() %>" data-role="<%= u.getRole() %>" onclick="handleEditUser(this)">Edit</button>
-                                            <a href="users?action=delete&id=<%= u.getId() %>" class="btn btn-danger" style="padding: 4px 10px; font-size: 0.8rem;" onclick="return confirm('Delete user <%= u.getUsername() %>?')">Delete</a>
+                                        <td style="text-align: right; white-space: nowrap;">
+                                            <button type="button" class="btn btn-secondary" style="padding: 5px 12px; font-size: 0.82rem; margin-right: 6px; font-weight: 600;" data-id="<%= u.getId() %>" data-username="<%= u.getUsername() %>" data-fullname="<%= u.getFullName() %>" data-role="<%= u.getRole() %>" onclick="handleEditUser(this)">✏️ Edit</button>
+                                            <a href="users?action=delete&id=<%= u.getId() %>" class="btn btn-danger" style="padding: 5px 12px; font-size: 0.82rem; font-weight: 700; text-decoration: none;" onclick="return confirm('Delete user <%= u.getUsername() %>?')">🗑️ Delete</a>
                                         </td>
                                     </tr>
                                 <% } } else { %>
@@ -856,7 +876,7 @@
                         <h2 class="panel-title">Registered Dentists Directory</h2>
                         <p class="panel-subtitle">List of consulting dentists, specializations, and contact phone numbers</p>
                     </div>
-                    <div style="overflow-x: auto; border-radius: 12px; border: 1px solid #e2e8f0;">
+                    <div class="table-scroll-container">
                         <table class="report-table" style="margin-top: 0;">
                             <thead>
                                 <tr>
@@ -874,9 +894,9 @@
                                         <td style="font-weight: 600;"><%= d.getDentistName() %></td>
                                         <td><%= d.getSpecialization() %></td>
                                         <td><%= d.getContactNumber() != null ? d.getContactNumber() : "-" %></td>
-                                        <td style="text-align: right;">
-                                            <button type="button" class="btn btn-secondary" style="padding: 4px 10px; font-size: 0.8rem; margin-right: 4px;" data-id="<%= d.getId() %>" data-name="<%= d.getDentistName() %>" data-spec="<%= d.getSpecialization() %>" data-contact="<%= d.getContactNumber() != null ? d.getContactNumber() : "" %>" onclick="handleEditDentist(this)">Edit</button>
-                                            <a href="dentists?action=delete&id=<%= d.getId() %>" class="btn btn-danger" style="padding: 4px 10px; font-size: 0.8rem;" onclick="return confirm('Delete dentist <%= d.getDentistName() %>?')">Delete</a>
+                                        <td style="text-align: right; white-space: nowrap;">
+                                            <button type="button" class="btn btn-secondary" style="padding: 5px 12px; font-size: 0.82rem; margin-right: 6px; font-weight: 600;" data-id="<%= d.getId() %>" data-name="<%= d.getDentistName() %>" data-spec="<%= d.getSpecialization() %>" data-contact="<%= d.getContactNumber() != null ? d.getContactNumber() : "" %>" onclick="handleEditDentist(this)">✏️ Edit</button>
+                                            <a href="dentists?action=delete&id=<%= d.getId() %>" class="btn btn-danger" style="padding: 5px 12px; font-size: 0.82rem; font-weight: 700; text-decoration: none;" onclick="return confirm('Delete dentist <%= d.getDentistName() %>?')">🗑️ Delete</a>
                                         </td>
                                     </tr>
                                 <% } } else { %>
@@ -936,7 +956,7 @@
                         <h2 class="panel-title">Clinic Treatment Packages & Service Rates</h2>
                         <p class="panel-subtitle">Active clinical treatment packages and current price rates</p>
                     </div>
-                    <div style="overflow-x: auto; border-radius: 12px; border: 1px solid #e2e8f0;">
+                    <div class="table-scroll-container">
                         <table class="report-table" style="margin-top: 0;">
                             <thead>
                                 <tr>
@@ -952,13 +972,160 @@
                                         <td><%= t.getId() %></td>
                                         <td style="font-weight: 600;"><%= t.getTreatmentName() %></td>
                                         <td style="text-align: right;">LKR <%= String.format("%,.2f", t.getCost()) %></td>
-                                        <td style="text-align: right;">
-                                            <button type="button" class="btn btn-secondary" style="padding: 4px 10px; font-size: 0.8rem; margin-right: 4px;" data-id="<%= t.getId() %>" data-name="<%= t.getTreatmentName() %>" data-cost="<%= t.getCost() %>" onclick="handleEditTreatment(this)">Edit</button>
-                                            <a href="treatments?action=delete&id=<%= t.getId() %>" class="btn btn-danger" style="padding: 4px 10px; font-size: 0.8rem;" onclick="return confirm('Delete treatment <%= t.getTreatmentName() %>?')">Delete</a>
+                                        <td style="text-align: right; white-space: nowrap;">
+                                            <button type="button" class="btn btn-secondary" style="padding: 5px 12px; font-size: 0.82rem; margin-right: 6px; font-weight: 600;" data-id="<%= t.getId() %>" data-name="<%= t.getTreatmentName() %>" data-cost="<%= t.getCost() %>" onclick="handleEditTreatment(this)">✏️ Edit</button>
+                                            <a href="treatments?action=delete&id=<%= t.getId() %>" class="btn btn-danger" style="padding: 5px 12px; font-size: 0.82rem; font-weight: 700; text-decoration: none;" onclick="return confirm('Delete treatment <%= t.getTreatmentName() %>?')">🗑️ Delete</a>
                                         </td>
                                     </tr>
                                 <% } } else { %>
                                     <tr><td colspan="4" style="text-align: center; color: #64748b;">No treatment packages found.</td></tr>
+                                <% } %>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+            <% } %>
+
+            <!-- TAB: ANALYTICS & REPORTS (ADMIN ONLY) -->
+            <% if ("Admin".equals(role)) { %>
+            <section id="tab-reports" class="tab-content <%= "tab-reports".equals(activeTab) ? "active" : "" %>">
+                <div style="margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem;">
+                    <div>
+                        <h1 style="color: #0284c7; margin-bottom: 0.4rem; font-size: 1.8rem;">Clinic Analytics & Visual Reports</h1>
+                        <p style="color: #64748b; font-size: 0.95rem;">Interactive visual charts and financial analysis for clinic performance</p>
+                    </div>
+                    <span class="status-pill status-scheduled" style="font-size: 0.9rem; padding: 8px 16px;"><%= activeFilterLabel %></span>
+                </div>
+
+                <!-- Date & Month Filter Card -->
+                <div class="panel no-print" style="margin-bottom: 2rem; background: #ffffff;">
+                    <div class="panel-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+                        <div>
+                            <h2 class="panel-title" style="color: #0f172a;">📅 Report Date & Month Filter</h2>
+                            <p class="panel-subtitle">Select a specific date or month to filter appointment graphs and revenue metrics</p>
+                        </div>
+                        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                            <button type="button" onclick="downloadCSVReport()" class="btn btn-secondary">📥 Export CSV</button>
+                        </div>
+                    </div>
+
+                    <form action="dashboard" method="GET" style="display: flex; gap: 1.25rem; align-items: flex-end; flex-wrap: wrap;">
+                        <input type="hidden" name="tab" value="tab-reports">
+                        <div class="form-group" style="flex: 1; min-width: 180px;">
+                            <label for="filter_date">Filter by Specific Date</label>
+                            <input type="date" id="filter_date" name="filter_date" value="<%= filterDate != null ? filterDate : "" %>" onchange="document.getElementById('filter_month').value=''">
+                        </div>
+
+                        <div class="form-group" style="flex: 1; min-width: 180px;">
+                            <label for="filter_month">Filter by Specific Month</label>
+                            <input type="month" id="filter_month" name="filter_month" value="<%= filterMonth != null ? filterMonth : "" %>" onchange="document.getElementById('filter_date').value=''">
+                        </div>
+
+                        <div style="display: flex; gap: 10px;">
+                            <button type="submit" class="btn btn-primary">🔍 Filter</button>
+                            <a href="dashboard?tab=tab-reports" class="btn btn-secondary">🔄 Reset</a>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- KPI Summary Cards -->
+                <div class="kpi-grid-container" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.25rem; margin-bottom: 2rem;">
+                    <div class="panel kpi-card-box" style="text-align: center; padding: 1.25rem;">
+                        <h3 style="color: #64748b; font-size: 0.8rem; font-weight: 700; text-transform: uppercase; margin-bottom: 0.4rem;">Total Appointments</h3>
+                        <span style="font-size: 2rem; font-weight: 800; color: #0284c7;"><%= apptCounts.getOrDefault("total", 0) %></span>
+                        <small style="display: block; margin-top: 4px; color: #64748b; font-size: 0.75rem;">All Registered Schedules</small>
+                    </div>
+
+                    <div class="panel kpi-card-box" style="text-align: center; padding: 1.25rem;">
+                        <h3 style="color: #64748b; font-size: 0.8rem; font-weight: 700; text-transform: uppercase; margin-bottom: 0.4rem;">Completed Appointments</h3>
+                        <span style="font-size: 2rem; font-weight: 800; color: #16a34a;"><%= apptCounts.getOrDefault("completed", 0) %></span>
+                        <small style="display: block; margin-top: 4px; color: #64748b; font-size: 0.75rem;">Finished Checkups</small>
+                    </div>
+
+                    <div class="panel kpi-card-box" style="text-align: center; padding: 1.25rem;">
+                        <h3 style="color: #64748b; font-size: 0.8rem; font-weight: 700; text-transform: uppercase; margin-bottom: 0.4rem;">Cancelled Appointments</h3>
+                        <span style="font-size: 2rem; font-weight: 800; color: #dc2626;"><%= apptCounts.getOrDefault("cancelled", 0) %></span>
+                        <small style="display: block; margin-top: 4px; color: #64748b; font-size: 0.75rem;">Released Time Slots</small>
+                    </div>
+
+                    <div class="panel kpi-card-box" style="text-align: center; padding: 1.25rem;">
+                        <h3 style="color: #64748b; font-size: 0.8rem; font-weight: 700; text-transform: uppercase; margin-bottom: 0.4rem;">Total Revenue</h3>
+                        <span style="font-size: 1.6rem; font-weight: 800; color: #059669;">LKR <%= String.format("%,.2f", financialSummary.getOrDefault("total_revenue", 0.0)) %></span>
+                        <small style="display: block; margin-top: 4px; color: #64748b; font-size: 0.75rem;">Treatment + Consultation</small>
+                    </div>
+                </div>
+
+                <!-- VISUAL GRAPH 1: BAR CHART -->
+                <div class="panel" style="margin-bottom: 2rem;">
+                    <div class="panel-header">
+                        <h2 class="panel-title">📊 Treatment Revenue & Service Volume (Bar Graph)</h2>
+                        <p class="panel-subtitle">Visual comparison of revenue generated and times performed across clinical treatment packages</p>
+                    </div>
+                    <div style="position: relative; min-height: 250px; width: 100%; padding: 10px;">
+                        <canvas id="treatmentBarChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- VISUAL GRAPH 2: LINE GRAPH -->
+                <div class="panel page-break-before" style="margin-bottom: 2rem;">
+                    <div class="panel-header">
+                        <h2 class="panel-title">📈 Dentist Appointment Volume & Distribution (Line Graph)</h2>
+                        <p class="panel-subtitle">Visual trend curve showing total patient appointments handled per dentist</p>
+                    </div>
+                    <div style="position: relative; min-height: 250px; width: 100%; padding: 10px;">
+                        <canvas id="dentistLineChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- DETAILED DATA TABLES -->
+                <div class="panel" style="margin-bottom: 2rem;">
+                    <div class="panel-header">
+                        <h2 class="panel-title">📋 Detailed Analytics Data Directory</h2>
+                        <p class="panel-subtitle">Exact data tables for dentist appointment volumes and clinical treatment package earnings</p>
+                    </div>
+                    
+                    <h3 style="color: #0284c7; font-size: 1.05rem; margin-bottom: 0.75rem;">Dentist Appointment Volume Table</h3>
+                    <div class="table-scroll-container" style="margin-bottom: 1.75rem;">
+                        <table class="report-table" id="dentist-table" style="margin-top: 0;">
+                            <thead>
+                                <tr>
+                                    <th>Dentist Name</th>
+                                    <th style="text-align: right;">Total Appointments</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <% if (dentistStats != null && !dentistStats.isEmpty()) { for (Map<String, Object> stat : dentistStats) { %>
+                                    <tr>
+                                        <td style="font-weight: 600;"><%= stat.get("dentist_name") %></td>
+                                        <td style="text-align: right; font-weight: 700; color: #0284c7;"><%= stat.get("appointment_count") %></td>
+                                    </tr>
+                                <% } } else { %>
+                                    <tr><td colspan="2" style="text-align: center; color: #64748b;">No dentist statistics available for selected filter.</td></tr>
+                                <% } %>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <h3 style="color: #059669; font-size: 1.05rem; margin-bottom: 0.75rem;">Treatment Revenue Breakdown Table</h3>
+                    <div class="table-scroll-container">
+                        <table class="report-table" id="treatment-table" style="margin-top: 0;">
+                            <thead>
+                                <tr>
+                                    <th>Treatment Service</th>
+                                    <th style="text-align: center;">Times Performed</th>
+                                    <th style="text-align: right;">Total Generated (LKR)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <% if (treatmentReport != null && !treatmentReport.isEmpty()) { for (Map<String, Object> tr : treatmentReport) { %>
+                                    <tr>
+                                        <td style="font-weight: 600;"><%= tr.get("treatment_name") %></td>
+                                        <td style="text-align: center; font-weight: 600;"><%= tr.get("appointment_count") %></td>
+                                        <td style="text-align: right; font-weight: 700; color: #059669;">LKR <%= String.format("%,.2f", tr.get("total_earnings")) %></td>
+                                    </tr>
+                                <% } } else { %>
+                                    <tr><td colspan="3" style="text-align: center; color: #64748b;">No treatment revenue records available for selected filter.</td></tr>
                                 <% } %>
                             </tbody>
                         </table>
@@ -972,44 +1139,45 @@
                 <div class="panel">
                     <div class="panel-header">
                         <h2 class="panel-title">Help Section & System Guidance</h2>
-                        <p class="panel-subtitle">Comprehensive user guides, workflows, and FAQs for staff and administrators</p>
+                        <p class="panel-subtitle">Comprehensive user guides, clinical workflows, and FAQs for staff and administrators</p>
                     </div>
 
                     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
                         <div style="background: #ffffff; border: 1px solid #e2e8f0; padding: 1.5rem; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.03);">
                             <h3 style="color: #0284c7; margin-bottom: 0.75rem; font-size: 1.1rem; font-weight: 700;">📅 Registering Appointments</h3>
                             <p style="font-size: 0.92rem; color: #334155; line-height: 1.6;">
-                                1. Enter the patient's NIC or Passport number and click <strong style="color: #0f172a;">Verify Patient</strong>.<br>
+                                1. Enter the patient's <strong style="color: #0f172a;">Patient ID (e.g. PAT-0001)</strong>, Phone Number, or Name and click <strong style="color: #0284c7;">🔍 Verify Patient</strong>.<br>
                                 2. If registered, the patient's details will auto-populate.<br>
-                                3. Select Dentist, Treatment Package, Date, and Time, then click <strong style="color: #0284c7;">Register Appointment</strong>.
+                                3. Select Dentist, Treatment Package, Date, and Time Slot, then click <strong style="color: #0284c7;">Register Appointment</strong>.
                             </p>
                         </div>
 
                         <div style="background: #ffffff; border: 1px solid #e2e8f0; padding: 1.5rem; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.03);">
-                            <h3 style="color: #059669; margin-bottom: 0.75rem; font-size: 1.1rem; font-weight: 700;">👤 Patient Registration</h3>
+                            <h3 style="color: #059669; margin-bottom: 0.75rem; font-size: 1.1rem; font-weight: 700;">👤 Patient Registration (No NIC Required)</h3>
                             <p style="font-size: 0.92rem; color: #334155; line-height: 1.6;">
-                                1. Clinic staff or admins can add new patient profiles under <strong style="color: #0f172a;">Patient Registration</strong>.<br>
-                                2. Patient Name, NIC/Passport, and Contact Phone are required.<br>
-                                3. Existing profiles can be updated or deleted using table action buttons.
+                                1. Clinic staff or admins can register new patient profiles under <strong style="color: #0f172a;">Patient Registration</strong>.<br>
+                                2. Only <strong style="color: #059669;">Patient Name</strong> and <strong style="color: #059669;">Contact Phone Number</strong> are required. (NIC is not required for children or adults).<br>
+                                3. The system automatically assigns a unique <code style="background: #ecfdf5; color: #047857; padding: 2px 6px; border-radius: 4px; font-weight: 700;">PAT-0001</code> Patient ID for instant lookup.
                             </p>
                         </div>
 
                         <div style="background: #ffffff; border: 1px solid #e2e8f0; padding: 1.5rem; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.03);">
-                            <h3 style="color: #d97706; margin-bottom: 0.75rem; font-size: 1.1rem; font-weight: 700;">🧾 Billing & Receipts</h3>
+                            <h3 style="color: #d97706; margin-bottom: 0.75rem; font-size: 1.1rem; font-weight: 700;">🧾 Billing, Cash & Receipts</h3>
                             <p style="font-size: 0.92rem; color: #334155; line-height: 1.6;">
                                 1. Go to <strong style="color: #0f172a;">Calculate & Bill</strong> tab.<br>
                                 2. Enter the Appointment Number (e.g. <code style="background: #f1f5f9; padding: 2px 6px; border-radius: 4px; color: #0f172a;">APPT-1001</code>) and Doctor Consultation Fee.<br>
-                                3. Click <strong style="color: #d97706;">Generate Payment Receipt</strong> to view and print the official receipt.
+                                3. Select Payment Method (Cash or Card). For Cash, enter Cash Given to automatically calculate Balance Returned.<br>
+                                4. Click <strong style="color: #d97706;">Generate Payment Receipt</strong> to print official thermal/A4 receipt.
                             </p>
                         </div>
 
                         <% if ("Admin".equals(role)) { %>
                         <div style="background: #ffffff; border: 1px solid #e2e8f0; padding: 1.5rem; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.03);">
-                            <h3 style="color: #9333ea; margin-bottom: 0.75rem; font-size: 1.1rem; font-weight: 700;">⚙️ Admin Controls</h3>
+                            <h3 style="color: #9333ea; margin-bottom: 0.75rem; font-size: 1.1rem; font-weight: 700;">📊 Analytics & Admin Controls</h3>
                             <p style="font-size: 0.92rem; color: #334155; line-height: 1.6;">
+                                • <strong style="color: #0f172a;">Analytics & Reports</strong>: View interactive Bar and Line graphs, filter by Date/Month, and export CSV reports.<br>
                                 • <strong style="color: #0f172a;">User Management</strong>: Create, edit, or delete staff and admin user accounts.<br>
-                                • <strong style="color: #0f172a;">Dentist Management</strong>: Register consulting doctors and specializations.<br>
-                                • <strong style="color: #0f172a;">Treatment Packages</strong>: Manage clinic treatment offerings and pricing.
+                                • <strong style="color: #0f172a;">Dentist & Treatments</strong>: Manage consulting doctors, specializations, and service package pricing.
                             </p>
                         </div>
                         <% } %>
@@ -1019,12 +1187,16 @@
                         <h3 style="color: #0284c7; margin-bottom: 1rem; font-size: 1.2rem; font-weight: 700;">❓ Frequently Asked Questions (FAQ)</h3>
                         <div style="display: flex; flex-direction: column; gap: 1.25rem; font-size: 0.92rem;">
                             <div style="border-bottom: 1px solid #e2e8f0; padding-bottom: 1rem;">
-                                <strong style="color: #0f172a; font-size: 0.95rem; display: block; margin-bottom: 0.25rem;">Q: Can unregistered patients book appointments?</strong>
-                                <p style="color: #475569; margin: 0;">A: No. Patients must first be registered under Patient Registration using a valid NIC or Passport number.</p>
+                                <strong style="color: #0f172a; font-size: 0.95rem; display: block; margin-bottom: 0.25rem;">Q: How do I register children who do not have an NIC card?</strong>
+                                <p style="color: #475569; margin: 0;">A: NIC is completely optional! Simply register the child under <strong>Patient Registration</strong> with their Name and Guardian's Phone Number. The system will automatically generate a unique Patient ID (e.g. <code>PAT-0005</code>) for them.</p>
+                            </div>
+                            <div style="border-bottom: 1px solid #e2e8f0; padding-bottom: 1rem;">
+                                <strong style="color: #0f172a; font-size: 0.95rem; display: block; margin-bottom: 0.25rem;">Q: How do I verify a patient for booking an appointment?</strong>
+                                <p style="color: #475569; margin: 0;">A: You can enter their <strong>Patient ID (e.g. PAT-0001)</strong>, Phone Number (e.g. 0771234567), or Patient Name in the <em>Verify Patient</em> input field on the <strong>Register Appointment</strong> tab.</p>
                             </div>
                             <div>
                                 <strong style="color: #0f172a; font-size: 0.95rem; display: block; margin-bottom: 0.25rem;">Q: How do I change an appointment status to Completed or Cancelled?</strong>
-                                <p style="color: #475569; margin: 0;">A: Navigate to <strong>Search Details</strong> directory and click the <em>Complete</em> or <em>Cancel</em> action button next to the schedule.</p>
+                                <p style="color: #475569; margin: 0;">A: Generating a bill for an appointment automatically marks its status as <strong>Completed</strong>. You can also navigate to the <strong>Search Details</strong> tab and click <em>Complete</em> or <em>Cancel</em> next to any schedule.</p>
                             </div>
                         </div>
                     </div>
@@ -1039,6 +1211,201 @@
         ⬆
     </button>
 
+    <!-- Hidden HTML Data Container for Clean Pure JavaScript Access -->
+    <div id="csv-data-container" style="display: none;"
+         data-filter="<%= activeFilterLabel %>"
+         data-filter-date="<%= filterDate != null ? filterDate.trim() : "" %>"
+         data-filter-month="<%= filterMonth != null ? filterMonth.trim() : "" %>"
+         data-total="<%= apptCounts.getOrDefault("total", 0) %>"
+         data-completed="<%= apptCounts.getOrDefault("completed", 0) %>"
+         data-cancelled="<%= apptCounts.getOrDefault("cancelled", 0) %>"
+         data-revenue="<%= financialSummary.getOrDefault("total_revenue", 0.0) %>">
+    </div>
+
     <script src="js/app.js?v=9"></script>
+    <script>
+        // Clean URL search parameters so F5 refresh or sidebar click reloads a fresh clean search page
+        if (window.history.replaceState && (window.location.search.includes('search_appt_num=') || window.location.search.includes('bill_appt_num='))) {
+            const cleanUrl = window.location.protocol + "//" + window.location.host + window.location.pathname + "?tab=<%= activeTab %>";
+            window.history.replaceState(null, '', cleanUrl);
+        }
+
+        // Render Chart.js graphs for integrated Analytics & Reports tab
+        document.addEventListener("DOMContentLoaded", function() {
+            // Extract Dentist Volume Data for Line Graph
+            const dentistLabels = [];
+            const dentistData = [];
+            const dentistTrs = document.querySelectorAll("#dentist-table tbody tr");
+            dentistTrs.forEach(function(tr) {
+                const tds = tr.querySelectorAll("td");
+                if (tds.length >= 2 && !tr.textContent.includes("No dentist statistics")) {
+                    dentistLabels.push(tds[0].textContent.trim());
+                    dentistData.push(parseInt(tds[1].textContent.trim(), 10) || 0);
+                }
+            });
+
+            // Extract Treatment Revenue Data for Bar Graph
+            const treatmentLabels = [];
+            const treatmentRevenueData = [];
+            const treatmentCountData = [];
+            const treatmentTrs = document.querySelectorAll("#treatment-table tbody tr");
+            treatmentTrs.forEach(function(tr) {
+                const tds = tr.querySelectorAll("td");
+                if (tds.length >= 3 && !tr.textContent.includes("No treatment revenue")) {
+                    treatmentLabels.push(tds[0].textContent.trim());
+                    treatmentCountData.push(parseInt(tds[1].textContent.trim(), 10) || 0);
+                    let revNum = parseFloat(tds[2].textContent.replace(/LKR|,|\s/gi, "").trim()) || 0;
+                    treatmentRevenueData.push(revNum);
+                }
+            });
+
+            // Render Bar Chart (Treatment Revenue Breakdown)
+            const ctxBar = document.getElementById("treatmentBarChart");
+            if (ctxBar && typeof Chart !== "undefined") {
+                new Chart(ctxBar, {
+                    type: "bar",
+                    data: {
+                        labels: treatmentLabels.length > 0 ? treatmentLabels : ["No Data"],
+                        datasets: [
+                            {
+                                label: "Total Revenue Generated (LKR)",
+                                data: treatmentRevenueData.length > 0 ? treatmentRevenueData : [0],
+                                backgroundColor: "rgba(2, 132, 199, 0.8)",
+                                borderColor: "#0284c7",
+                                borderWidth: 1.5,
+                                borderRadius: 6
+                            },
+                            {
+                                label: "Times Performed",
+                                data: treatmentCountData.length > 0 ? treatmentCountData : [0],
+                                backgroundColor: "rgba(16, 185, 129, 0.8)",
+                                borderColor: "#10b981",
+                                borderWidth: 1.5,
+                                borderRadius: 6
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { position: "top" }
+                        },
+                        scales: {
+                            y: { beginAtZero: true }
+                        }
+                    }
+                });
+            }
+
+            // Render Line Chart (Dentist Appointment Volume Trend Curve)
+            const ctxLine = document.getElementById("dentistLineChart");
+            if (ctxLine && typeof Chart !== "undefined") {
+                new Chart(ctxLine, {
+                    type: "line",
+                    data: {
+                        labels: dentistLabels.length > 0 ? dentistLabels : ["No Data"],
+                        datasets: [{
+                            label: "Total Patient Appointments",
+                            data: dentistData.length > 0 ? dentistData : [0],
+                            borderColor: "#2563eb",
+                            backgroundColor: "rgba(37, 99, 235, 0.15)",
+                            borderWidth: 3,
+                            fill: true,
+                            tension: 0.35,
+                            pointBackgroundColor: "#1d4ed8",
+                            pointBorderColor: "#ffffff",
+                            pointBorderWidth: 2,
+                            pointRadius: 6,
+                            pointHoverRadius: 8
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { position: "top" }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: { stepSize: 1 }
+                            }
+                        }
+                    }
+                });
+            }
+        });
+
+        function downloadCSVReport() {
+            const container = document.getElementById("csv-data-container");
+            if (!container) return;
+
+            let filterDateVal = container.dataset.filterDate || "";
+            let filterMonthVal = container.dataset.filterMonth || "";
+            let selectedFilterCriteria = "All Time Record Summary (No Date/Month Filter)";
+            if (filterDateVal) {
+                selectedFilterCriteria = "Filter by Specific Date: " + filterDateVal;
+            } else if (filterMonthVal) {
+                selectedFilterCriteria = "Filter by Specific Month: " + filterMonthVal;
+            }
+
+            let rows = [];
+            rows.push(["Report Title", "Sunrise Dental Clinic Analytics & Financial Report"]);
+            rows.push(["Applied Filter", selectedFilterCriteria]);
+            rows.push(["Filter Date", filterDateVal ? filterDateVal : "None"]);
+            rows.push(["Filter Month", filterMonthVal ? filterMonthVal : "None"]);
+            rows.push([]);
+            rows.push(["Category", "Detail", "Value"]);
+            rows.push(["Summary", "Total Appointments", container.dataset.total || "0"]);
+            rows.push(["Summary", "Completed Appointments", container.dataset.completed || "0"]);
+            rows.push(["Summary", "Cancelled Appointments", container.dataset.cancelled || "0"]);
+            rows.push(["Summary", "Total Revenue (LKR)", container.dataset.revenue || "0"]);
+
+            const tables = document.querySelectorAll("#tab-reports .report-table");
+            tables.forEach(function(table, index) {
+                rows.push([]);
+                const sectionTitle = index === 0 ? "Dentist Statistics" : "Treatment Revenue Breakdown";
+                rows.push([sectionTitle]);
+
+                const trs = table.querySelectorAll("tr");
+                trs.forEach(function(tr) {
+                    const cells = tr.querySelectorAll("th, td");
+                    const rowData = Array.from(cells).map(function(cell) {
+                        return cell.textContent.trim().replace(/\s+/g, " ");
+                    });
+                    if (rowData.length > 0) {
+                        rows.push(rowData);
+                    }
+                });
+            });
+
+            const csvContent = rows.map(function(row) {
+                return row.map(function(cell) {
+                    return '"' + (cell || '').toString().replace(/"/g, '""') + '"';
+                }).join(",");
+            }).join("\n");
+
+            let filename = "Sunrise_Dental_Report";
+            if (filterDateVal) {
+                filename += "_Date_" + filterDateVal;
+            } else if (filterMonthVal) {
+                filename += "_Month_" + filterMonthVal;
+            } else {
+                filename += "_All_Time";
+            }
+            filename += ".csv";
+
+            const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+            const link = document.createElement("a");
+            const url = URL.createObjectURL(blob);
+            link.setAttribute("href", url);
+            link.setAttribute("download", filename);
+            link.style.visibility = "hidden";
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+    </script>
 </body>
 </html>

@@ -330,50 +330,31 @@ function fetchAvailableTimeSlots() {
     const date = dateInput ? dateInput.value : '';
 
     if (!dentist || !date) {
-        if (promptMsg) promptMsg.textContent = 'Please select a Dentist and Date above to view live time slot availability.';
+        if (promptMsg) promptMsg.textContent = 'Please select a Dentist and Date above to select a time slot.';
         grid.innerHTML = '';
         return;
     }
 
-    if (promptMsg) promptMsg.textContent = `Live availability for ${dentist} on ${date}:`;
-    grid.innerHTML = '<span style="color: var(--text-muted); font-size: 0.85rem;">Loading live slots...</span>';
+    if (promptMsg) promptMsg.textContent = `Standard clinic time slots for ${dentist} on ${date}:`;
+    grid.innerHTML = '';
 
-    fetch(`appointments?action=getBookedTimes&dentist_name=${encodeURIComponent(dentist)}&appointment_date=${encodeURIComponent(date)}`)
-        .then(res => res.json())
-        .then(bookedTimes => {
-            grid.innerHTML = '';
-            STANDARD_CLINIC_SLOTS.forEach(slot => {
-                const isBooked = bookedTimes.includes(slot);
-                const btn = document.createElement('button');
-                btn.type = 'button';
-                btn.style.padding = '8px 14px';
-                btn.style.borderRadius = '8px';
-                btn.style.fontSize = '0.85rem';
-                btn.style.fontWeight = '600';
-                btn.style.border = 'none';
-                btn.style.cursor = isBooked ? 'not-allowed' : 'pointer';
-                btn.style.transition = 'all 0.2s ease';
-
-                if (isBooked) {
-                    btn.innerHTML = `🔴 ${slot} <span style="font-size: 0.75rem; opacity: 0.8;">(Booked)</span>`;
-                    btn.style.background = 'rgba(239, 68, 68, 0.2)';
-                    btn.style.color = '#f87171';
-                    btn.style.border = '1px solid rgba(239, 68, 68, 0.4)';
-                    btn.disabled = true;
-                } else {
-                    btn.innerHTML = `🟢 ${slot} <span style="font-size: 0.75rem; opacity: 0.9;">(Available)</span>`;
-                    btn.style.background = 'rgba(34, 197, 94, 0.15)';
-                    btn.style.color = '#4ade80';
-                    btn.style.border = '1px solid rgba(34, 197, 94, 0.4)';
-                    btn.onclick = () => selectTimeSlot(slot, btn);
-                }
-                grid.appendChild(btn);
-            });
-        })
-        .catch(err => {
-            console.error('Error fetching booked slots:', err);
-            grid.innerHTML = '<span style="color: #f87171; font-size: 0.85rem;">Error loading time slots.</span>';
-        });
+    STANDARD_CLINIC_SLOTS.forEach(slot => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.style.padding = '8px 14px';
+        btn.style.borderRadius = '8px';
+        btn.style.fontSize = '0.85rem';
+        btn.style.fontWeight = '600';
+        btn.style.border = 'none';
+        btn.style.cursor = 'pointer';
+        btn.style.transition = 'all 0.2s ease';
+        btn.innerHTML = `🟢 ${slot} <span style="font-size: 0.75rem; opacity: 0.9;">(Select)</span>`;
+        btn.style.background = 'rgba(34, 197, 94, 0.15)';
+        btn.style.color = '#15803d';
+        btn.style.border = '1px solid rgba(34, 197, 94, 0.4)';
+        btn.onclick = () => selectTimeSlot(slot, btn);
+        grid.appendChild(btn);
+    });
 }
 
 function selectTimeSlot(slot, clickedBtn) {

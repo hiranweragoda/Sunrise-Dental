@@ -63,7 +63,7 @@ ON DUPLICATE KEY UPDATE specialization = VALUES(specialization);
 CREATE TABLE IF NOT EXISTS patients (
     id INT AUTO_INCREMENT PRIMARY KEY,
     patient_name VARCHAR(100) NOT NULL,
-    nic_passport VARCHAR(50) UNIQUE NOT NULL,
+    patient_id VARCHAR(50) UNIQUE NOT NULL,
     address VARCHAR(255),
     phone_number VARCHAR(20) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -83,37 +83,20 @@ CREATE TABLE appointments (
     FOREIGN KEY (treatment_id) REFERENCES treatments(id)
 );
 
--- 4. Bills Table
+-- 4. Bills Table (Unified Billing & Payment Record)
 CREATE TABLE bills (
     bill_id INT AUTO_INCREMENT PRIMARY KEY,
-    appointment_number VARCHAR(50) UNIQUE NOT NULL,
+    appointment_number VARCHAR(50) NOT NULL,
+    treatment_cost DECIMAL(10, 2) NOT NULL,
     consultation_fee DECIMAL(10, 2) NOT NULL,
     total_cost DECIMAL(10, 2) NOT NULL,
+    payment_method VARCHAR(20) DEFAULT 'Cash',
+    cash_given DECIMAL(10, 2),
+    balance_returned DECIMAL(10, 2),
     bill_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     payment_status VARCHAR(20) DEFAULT 'Paid',
     FOREIGN KEY (appointment_number) REFERENCES appointments(appointment_number) ON DELETE CASCADE
 );
-
--- 5. Audit Log Table (to show trigger functionality)
-CREATE TABLE appointment_audit (
-    audit_id INT AUTO_INCREMENT PRIMARY KEY,
-    appointment_number VARCHAR(50) NOT NULL,
-    action_type VARCHAR(20) NOT NULL,
-    action_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    details VARCHAR(255)
-);
-
--- 6. Trigger to automatically log new appointments
-DELIMITER //
-CREATE TRIGGER after_appointment_insert
-AFTER INSERT ON appointments
-FOR EACH ROW
-BEGIN
-    INSERT INTO appointment_audit (appointment_number, action_type, details)
-    VALUES (NEW.appointment_number, 'INSERT', CONCAT('Appointment registered for patient: ', NEW.patient_name));
-END;
-//
-DELIMITER ;
 
 -- 7. Stored Procedure to calculate and generate a bill
 DELIMITER //

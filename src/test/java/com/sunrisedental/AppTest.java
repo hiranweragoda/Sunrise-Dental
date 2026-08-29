@@ -19,7 +19,6 @@ public class AppTest {
 
     @Test
     public void testDatabasePropertiesLoading() {
-        // Assert that we can load the properties file resource stream without throwing exception
         java.io.InputStream input = getClass().getClassLoader().getResourceAsStream("db.properties");
         assertNotNull("db.properties should be present on the classpath", input);
     }

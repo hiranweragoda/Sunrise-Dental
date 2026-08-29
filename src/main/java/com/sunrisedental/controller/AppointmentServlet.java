@@ -80,14 +80,14 @@ public class AppointmentServlet extends HttpServlet {
             String appointmentTimeStr = req.getParameter("appointment_time");
 
             if (nicInput == null || nicInput.trim().isEmpty()) {
-                session.setAttribute("flashError", "Please enter the Patient's NIC or Passport number.");
+                session.setAttribute("flashError", "Please enter the Patient ID, Phone, or Name.");
                 resp.sendRedirect(req.getContextPath() + "/dashboard?tab=tab-register");
                 return;
             }
 
             Patient patient = patientDAO.getPatientByNic(nicInput.trim());
             if (patient == null) {
-                session.setAttribute("flashError", "Cannot schedule appointment! No registered patient found with NIC/Passport \"" + nicInput.trim() + "\". Please register the patient under Patient Registration first.");
+                session.setAttribute("flashError", "Cannot schedule appointment! No registered patient found matching \"" + nicInput.trim() + "\". Please register the patient under Patient Registration first.");
                 resp.sendRedirect(req.getContextPath() + "/dashboard?tab=tab-register");
                 return;
             }
@@ -149,32 +149,6 @@ public class AppointmentServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String action = req.getParameter("action");
-        if ("getBookedTimes".equalsIgnoreCase(action)) {
-            String dentistName = req.getParameter("dentist_name");
-            String dateStr = req.getParameter("appointment_date");
-            resp.setContentType("application/json");
-            resp.setCharacterEncoding("UTF-8");
-
-            if (dentistName != null && dateStr != null && !dentistName.trim().isEmpty() && !dateStr.trim().isEmpty()) {
-                try {
-                    Date date = Date.valueOf(dateStr.trim());
-                    java.util.List<String> booked = appointmentDAO.getBookedTimes(dentistName.trim(), date);
-                    StringBuilder json = new StringBuilder("[");
-                    for (int i = 0; i < booked.size(); i++) {
-                        json.append("\"").append(booked.get(i)).append("\"");
-                        if (i < booked.size() - 1) json.append(",");
-                    }
-                    json.append("]");
-                    resp.getWriter().write(json.toString());
-                    return;
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-            resp.getWriter().write("[]");
-            return;
-        }
-
         String appNum = req.getParameter("appointment_number");
         String status = req.getParameter("status");
         HttpSession session = req.getSession(false);

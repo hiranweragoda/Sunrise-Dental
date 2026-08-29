@@ -3,16 +3,16 @@ package com.sunrisedental.model;
 public class Patient {
     private int id;
     private String patientName;
-    private String nicPassport;
+    private String patientIdCode;
     private String address;
     private String phoneNumber;
 
     public Patient() {}
 
-    public Patient(int id, String patientName, String nicPassport, String address, String phoneNumber) {
+    public Patient(int id, String patientName, String patientIdCode, String address, String phoneNumber) {
         this.id = id;
         this.patientName = patientName;
-        this.nicPassport = nicPassport;
+        this.patientIdCode = patientIdCode;
         this.address = address;
         this.phoneNumber = phoneNumber;
     }
@@ -23,8 +23,12 @@ public class Patient {
     public String getPatientName() { return patientName; }
     public void setPatientName(String patientName) { this.patientName = patientName; }
 
-    public String getNicPassport() { return nicPassport; }
-    public void setNicPassport(String nicPassport) { this.nicPassport = nicPassport; }
+    public String getPatientIdCode() { return patientIdCode; }
+    public void setPatientIdCode(String patientIdCode) { this.patientIdCode = patientIdCode; }
+
+    // Backward compatibility getters
+    public String getNicPassport() { return patientIdCode; }
+    public void setNicPassport(String nicPassport) { this.patientIdCode = nicPassport; }
 
     public String getAddress() { return address; }
     public void setAddress(String address) { this.address = address; }

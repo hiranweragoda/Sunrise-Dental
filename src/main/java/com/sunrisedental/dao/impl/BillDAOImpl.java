@@ -39,16 +39,14 @@ public class BillDAOImpl implements BillDAO {
             BigDecimal totalAmount = cs.getBigDecimal(4);
 
             if (billId > 0) {
-                // Record payment details in payments table (NO card numbers stored, only method)
-                String paySql = "INSERT INTO payments (bill_id, appointment_number, payment_method, total_amount, cash_given, balance_returned) VALUES (?, ?, ?, ?, ?, ?)";
-                try (PreparedStatement payPs = conn.prepareStatement(paySql)) {
-                    payPs.setInt(1, billId);
-                    payPs.setString(2, appointmentNumber);
-                    payPs.setString(3, paymentMethod != null ? paymentMethod : "Cash");
-                    payPs.setBigDecimal(4, totalAmount != null ? totalAmount : BigDecimal.ZERO);
-                    payPs.setBigDecimal(5, cashGiven);
-                    payPs.setBigDecimal(6, balanceReturned);
-                    payPs.executeUpdate();
+                // Update payment method details directly in bills table
+                String updateBillSql = "UPDATE bills SET payment_method = ?, cash_given = ?, balance_returned = ? WHERE bill_id = ?";
+                try (PreparedStatement updatePs = conn.prepareStatement(updateBillSql)) {
+                    updatePs.setString(1, paymentMethod != null ? paymentMethod : "Cash");
+                    updatePs.setBigDecimal(2, cashGiven);
+                    updatePs.setBigDecimal(3, balanceReturned);
+                    updatePs.setInt(4, billId);
+                    updatePs.executeUpdate();
                 } catch (Exception ex) {
                     ex.printStackTrace();
                 }
@@ -78,13 +76,11 @@ public class BillDAOImpl implements BillDAO {
 
     @Override
     public Bill getBillByAppointmentNumber(String appointmentNumber) {
-        String sql = "SELECT b.*, a.patient_name, a.dentist_name, t.treatment_name, t.cost as treatment_cost, " +
-                     "p.payment_method, p.cash_given, p.balance_returned " +
+        String sql = "SELECT b.*, a.patient_name, a.dentist_name, t.treatment_name, t.cost as treatment_cost " +
                      "FROM bills b " +
                      "JOIN appointments a ON b.appointment_number = a.appointment_number " +
                      "JOIN treatments t ON a.treatment_id = t.id " +
-                     "LEFT JOIN payments p ON b.bill_id = p.bill_id " +
-                     "WHERE b.appointment_number = ? ORDER BY p.payment_id DESC LIMIT 1";
+                     "WHERE b.appointment_number = ? ORDER BY b.bill_id DESC LIMIT 1";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             

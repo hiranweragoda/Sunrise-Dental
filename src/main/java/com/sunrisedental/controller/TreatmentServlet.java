@@ -52,10 +52,7 @@ public class TreatmentServlet extends HttpServlet {
             return;
         }
 
-        resp.setContentType("application/json");
-        resp.setCharacterEncoding("UTF-8");
-        List<Treatment> treatments = treatmentDAO.getAllTreatments();
-        resp.getWriter().write(gson.toJson(treatments));
+        resp.sendRedirect(req.getContextPath() + "/dashboard?tab=tab-treatments");
     }
 
     @Override

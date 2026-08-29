@@ -51,10 +51,7 @@ public class DentistServlet extends HttpServlet {
             return;
         }
 
-        resp.setContentType("application/json");
-        resp.setCharacterEncoding("UTF-8");
-        List<Dentist> list = dentistDAO.getAllDentists();
-        resp.getWriter().write(gson.toJson(list));
+        resp.sendRedirect(req.getContextPath() + "/dashboard?tab=tab-dentists");
     }
 
     @Override

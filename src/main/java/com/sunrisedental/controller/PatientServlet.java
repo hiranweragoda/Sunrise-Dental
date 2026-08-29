@@ -48,9 +48,8 @@ public class PatientServlet extends HttpServlet {
             }
 
             if (patientName == null || patientName.trim().isEmpty() ||
-                nicPassport == null || nicPassport.trim().isEmpty() ||
                 phoneNumber == null || phoneNumber.trim().isEmpty()) {
-                session.setAttribute("flashError", "Patient Name, NIC/Passport, and Phone Number are required.");
+                session.setAttribute("flashError", "Patient Name and Contact Phone Number are required.");
                 resp.sendRedirect(req.getContextPath() + "/dashboard?tab=tab-patients");
                 return;
             }
@@ -58,7 +57,7 @@ public class PatientServlet extends HttpServlet {
             boolean isUpdate = (idStr != null && !idStr.trim().isEmpty() && !idStr.trim().equals("0"));
             Patient patient = new Patient();
             patient.setPatientName(patientName.trim());
-            patient.setNicPassport(nicPassport.trim());
+            patient.setNicPassport(nicPassport != null ? nicPassport.trim() : "");
             patient.setPhoneNumber(phoneNumber.trim());
             patient.setAddress(address != null ? address.trim() : "");
 
@@ -71,9 +70,10 @@ public class PatientServlet extends HttpServlet {
             }
 
             if (success) {
-                session.setAttribute("flashSuccess", isUpdate ? "Patient profile updated successfully." : "Patient registered successfully.");
+                String patID = (patient.getNicPassport() != null && !patient.getNicPassport().trim().isEmpty()) ? patient.getNicPassport().trim() : String.format("PAT-%04d", patient.getId());
+                session.setAttribute("flashSuccess", isUpdate ? "✓ Patient profile updated successfully (" + patID + ")." : "✓ Patient Registered Successfully! Generated Patient ID: " + patID);
             } else {
-                session.setAttribute("flashError", isUpdate ? "Failed to update patient profile." : "Failed to register patient (NIC/Passport may already exist).");
+                session.setAttribute("flashError", isUpdate ? "Failed to update patient profile." : "Failed to register patient.");
             }
 
         } catch (Exception e) {
