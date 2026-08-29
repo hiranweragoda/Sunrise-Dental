@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sunrise Dental Clinic - Standard Class Diagram</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8fafc;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 2rem;
+            margin: 0;
+        }
+        .card {
+            background: #ffffff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 2.5rem;
+            max-width: 1100px;
+            width: 100%;
+            text-align: center;
+        }
+        h1 {
+            color: #0f172a;
+            margin-bottom: 0.5rem;
+        }
+        p {
+            color: #64748b;
+            margin-bottom: 2rem;
+        }
+        .mermaid {
+            display: flex;
+            justify-content: center;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <h1>🏥 Sunrise Dental Clinic Management System</h1>
+        <p>Class Diagram (Matching User Specific Layout Structure)</p>
+        
+        <div class="mermaid">
+classDiagram
+    %% USER SECURITY & ROLES LAYER (TOP & LEFT)
+    class User {
+        -id : int
+        -username : String
+        -passwordHash : String
+        -role : String
+        +login() : boolean
+        +logout() : void
+    }
+
+    class Staff {
+        +registerPatient() : void
+        +verifyPatient() : void
+        +bookAppointment() : void
+        +generateBill() : void
+    }
+
+    class Admin {
+        +createStaffAccounts() : void
+        +manageDentists() : void
+        +manageTreatments() : void
+        +viewAnalytics() : void
+    }
+
+    %% CENTER: PATIENT ENTITY
+    class Patient {
+        -id : int
+        -patientName : String
+        -patientIdCode : String
+        -address : String
+        -phoneNumber : String
+        +registerPatient() : boolean
+        +updatePatient() : boolean
+        +deletePatient() : boolean
+    }
+
+    %% RIGHT: TREATMENT PACKAGE ENTITY
+    class Treatment {
+        -id : int
+        -treatmentName : String
+        -cost : BigDecimal
+        +createTreatment() : void
+        +updateTreatment() : void
+        +deleteTreatment() : void
+    }
+
+    %% BOTTOM LEFT: APPOINTMENT ENTITY
+    class Appointment {
+        -appointmentNumber : String
+        -patientName : String
+        -dentistName : String
+        -treatmentId : int
+        -appointmentDate : Date
+        -appointmentTime : Time
+        -status : String
+        +bookAppointment() : boolean
+        +updateStatus() : boolean
+    }
+
+    %% BOTTOM: BILL ENTITY
+    class Bill {
+        -billId : int
+        -appointmentNumber : String
+        -treatmentCost : BigDecimal
+        -consultationFee : BigDecimal
+        -totalCost : BigDecimal
+        -paymentMethod : String
+        -cashGiven : BigDecimal
+        -balanceReturned : BigDecimal
+        +generateBill() : void
+    }
+
+    %% RELATIONSHIPS & INHERITANCE / ASSOCIATIONS
+    Staff --|> User : inherits
+    Admin --|> User : inherits
+
+    User "1" -- "0..*" Patient : manage
+    User "1" -- "0..*" Treatment : manage
+    User "1" -- "0..*" Appointment : generate
+
+    Patient "1" *-- "0..*" Appointment : has
+    Appointment "1" -- "0..1" Bill : generates
+        </div>
+    </div>
+
+    <script>
+        mermaid.initialize({ startOnLoad: true, theme: 'default' });
+    </script>
+</body>
+</html>

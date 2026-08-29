@@ -4,6 +4,8 @@ import com.sunrisedental.util.DBConnection;
 import com.sunrisedental.dao.UserDAO;
 import com.sunrisedental.model.User;
 
+import org.mindrot.jbcrypt.BCrypt;
+
 import java.security.MessageDigest;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -26,10 +28,19 @@ public class UserDAOImpl implements UserDAO {
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
                     String storedHash = rs.getString("password_hash");
-                    String inputHash = hashPassword(password);
 
-                    // Support both SHA-256 hashed passwords and legacy plain text
-                    if (storedHash != null && (storedHash.equals(inputHash) || storedHash.equals(password))) {
+                    boolean isMatch = false;
+                    if (storedHash != null) {
+                        if (storedHash.startsWith("$2a$") || storedHash.startsWith("$2b$") || storedHash.startsWith("$2y$")) {
+                            isMatch = BCrypt.checkpw(password, storedHash);
+                        } else {
+                            // Support SHA-256 legacy or plain text fallback
+                            String sha256Input = legacySha256(password);
+                            isMatch = storedHash.equals(sha256Input) || storedHash.equals(password);
+                        }
+                    }
+
+                    if (isMatch) {
                         return new User(
                             rs.getInt("id"),
                             rs.getString("username"),
@@ -121,6 +132,11 @@ public class UserDAOImpl implements UserDAO {
     }
 
     private String hashPassword(String password) {
+        if (password == null || password.trim().isEmpty()) return "";
+        return BCrypt.hashpw(password, BCrypt.gensalt(10));
+    }
+
+    private String legacySha256(String password) {
         if (password == null) return "";
         try {
             MessageDigest digest = MessageDigest.getInstance("SHA-256");

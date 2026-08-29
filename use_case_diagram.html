@@ -47,8 +47,8 @@
         <div class="mermaid">
 graph LR
     %% Actors
-    Staff["👤 Staff"]
-    Admin["👨‍💼 Admin"]
+    Staff["👤 Clinical Staff"]
+    Admin["👨‍💼 System Administrator"]
 
     %% Red System Boundary Box matching user example
     subgraph SystemBoundary ["Sunrise Dental Clinic Management System"]
@@ -81,7 +81,7 @@ graph LR
         style UC12 fill:#dbeafe,stroke:#2563eb,stroke-width:1.5px
     end
 
-    %% Staff Connections (Left side)
+    %% Staff Connections (Clinical Operations Only)
     Staff --> UC1
     Staff --> UC2
     Staff --> UC3
@@ -91,13 +91,10 @@ graph LR
     Staff --> UC7
     Staff --> UC12
 
-    %% Admin Connections (Right side)
+    %% Admin Connections (Search & Administrative Management Only)
     Admin --> UC1
-    Admin --> UC2
     Admin --> UC3
-    Admin --> UC4
     Admin --> UC5
-    Admin --> UC6
     Admin --> UC7
     Admin --> UC8
     Admin --> UC9

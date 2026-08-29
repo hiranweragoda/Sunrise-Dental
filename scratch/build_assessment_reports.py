@@ -448,8 +448,13 @@ def create_docx_report():
     add_body(SEC5_BODY_NOCITATIONS)
 
     # Save DOCX
-    doc.save(DOCX_PATH)
-    print(f"DOCX Report created successfully at: {DOCX_PATH}")
+    try:
+        doc.save(DOCX_PATH)
+        print(f"DOCX Report created successfully at: {DOCX_PATH}")
+    except PermissionError:
+        alt_path = os.path.join(OUTPUT_DIR, "Sunrise_Dental_Clinic_Assessment_Report_v2.docx")
+        doc.save(alt_path)
+        print(f"DOCX Report created at alternative path (file locked): {alt_path}")
 
 
 # ==============================================================================

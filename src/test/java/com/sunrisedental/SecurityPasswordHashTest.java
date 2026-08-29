@@ -3,26 +3,19 @@ package com.sunrisedental;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
-import java.security.MessageDigest;
+import org.mindrot.jbcrypt.BCrypt;
 
 public class SecurityPasswordHashTest {
 
     @Test
-    public void testSHA256PasswordHashLength() throws Exception {
+    public void testBCryptPasswordHashingAndVerification() {
         String rawPassword = "admin123";
-        MessageDigest md = MessageDigest.getInstance("SHA-256");
-        byte[] hash = md.digest(rawPassword.getBytes());
-
-        StringBuilder hexString = new StringBuilder();
-        for (byte b : hash) {
-            String hex = Integer.toHexString(0xff & b);
-            if (hex.length() == 1) hexString.append('0');
-            hexString.append(hex);
-        }
-
-        String hashedPassword = hexString.toString();
+        String hashedPassword = BCrypt.hashpw(rawPassword, BCrypt.gensalt(10));
 
         assertNotNull(hashedPassword);
-        assertEquals(64, hashedPassword.length()); // SHA-256 hex string is always 64 characters long
+        assertTrue(hashedPassword.startsWith("$2a$") || hashedPassword.startsWith("$2b$"));
+        assertEquals(60, hashedPassword.length()); // Standard BCrypt hash is 60 characters
+        assertTrue(BCrypt.checkpw("admin123", hashedPassword));
+        assertFalse(BCrypt.checkpw("wrongpass", hashedPassword));
     }
 }

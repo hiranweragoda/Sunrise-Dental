@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sunrise Dental Clinic - Standard Conceptual Sequence Diagrams</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8fafc;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 2rem;
+            margin: 0;
+        }
+        .card {
+            background: #ffffff;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            padding: 2.5rem;
+            max-width: 1000px;
+            width: 100%;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+        h1 {
+            color: #0f172a;
+            margin-bottom: 0.5rem;
+        }
+        h2 {
+            color: #0284c7;
+            margin-top: 0;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 0.5rem;
+            text-align: left;
+        }
+        p {
+            color: #64748b;
+            text-align: left;
+            margin-bottom: 1.5rem;
+        }
+        .mermaid {
+            display: flex;
+            justify-content: center;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <h1>🏥 Sunrise Dental Clinic Management System</h1>
+        <p style="text-align: center;">Conceptual Sequence Diagrams (No Impl/Servlet Suffixes)</p>
+    </div>
+
+    <!-- SECTION 1 -->
+    <div class="card">
+        <h2>1. User Authentication & Login Workflow</h2>
+        <div class="mermaid">
+sequenceDiagram
+    actor Admin as Admin / Staff
+    participant View as Login UI
+    participant Controller as Auth Controller
+    participant DAO as User DAO
+    participant DB as MySQL Database
+
+    Admin->>View: Enter Username & Password
+    activate View
+    View->>Controller: POST /auth (username, password)
+    activate Controller
+    Controller->>Controller: Hash password using SHA-256
+    Controller->>DAO: validateUser(username, passwordHash)
+    activate DAO
+    DAO->>DB: SELECT * FROM users WHERE username=? AND password_hash=?
+    activate DB
+    DB-->>DAO: Return User record
+    deactivate DB
+    DAO-->>Controller: Return User object
+    deactivate DAO
+    alt Valid Credentials
+        Controller->>Controller: Initialize HttpSession (setUser, setRole)
+        Controller-->>View: Redirect to Dashboard UI
+    else Invalid Credentials
+        Controller-->>View: Forward Login UI with error message
+    end
+    deactivate Controller
+    deactivate View
+        </div>
+    </div>
+
+    <!-- SECTION 2 -->
+    <div class="card">
+        <h2>2. Patient Registration & Auto Patient ID Generation Workflow</h2>
+        <div class="mermaid">
+sequenceDiagram
+    actor Staff as Staff
+    participant View as Patient UI
+    participant Controller as Patient Controller
+    participant DAO as Patient DAO
+    participant DB as MySQL Database
+
+    Staff->>View: Fill Patient Name, Address & Phone Number
+    activate View
+    View->>Controller: POST /patients (action=add, name, address, phone)
+    activate Controller
+    Controller->>DAO: createPatient(Patient object)
+    activate DAO
+    DAO->>DB: INSERT INTO patients (patient_name, address, phone_number) VALUES (...)
+    activate DB
+    DB-->>DAO: Return generated primary key (e.g. ID = 5)
+    deactivate DB
+    DAO->>DAO: Format Patient ID Code: PAT-0005
+    DAO->>DB: UPDATE patients SET patient_id='PAT-0005' WHERE id=5
+    activate DB
+    DB-->>DAO: Update confirmed
+    deactivate DB
+    DAO-->>Controller: Return true (Success)
+    deactivate DAO
+    Controller-->>View: Redirect to Patient UI with flashSuccess
+    deactivate Controller
+    deactivate View
+        </div>
+    </div>
+
+    <!-- SECTION 3 -->
+    <div class="card">
+        <h2>3. Appointment Booking & Conflict Check Workflow</h2>
+        <div class="mermaid">
+sequenceDiagram
+    actor Staff as Staff
+    participant View as Appointment UI
+    participant Controller as Appointment Controller
+    participant DAO as Appointment DAO
+    participant DB as MySQL Database
+
+    Staff->>View: Select Dentist, Date & Time Slot
+    activate View
+    View->>DAO: getBookedTimes(dentistName, date)
+    activate DAO
+    DAO->>DB: SELECT appointment_time FROM appointments WHERE dentist_name=? AND appointment_date=?
+    activate DB
+    DB-->>DAO: Return list of booked time slots
+    deactivate DB
+    DAO-->>View: Render active time slots (Disable booked slots)
+    deactivate DAO
+    Staff->>View: Submit Appointment Form
+    View->>Controller: POST /appointments (patientName, dentist, date, time)
+    activate Controller
+    Controller->>DAO: checkConflict(dentist, date, time)
+    activate DAO
+    alt Time Slot Available
+        Controller->>DAO: createAppointment(Appointment)
+        DAO->>DB: INSERT INTO appointments (appointment_number, ...) VALUES ('APPT-1001', ...)
+        activate DB
+        DB-->>DAO: Insert success
+        deactivate DB
+        DAO-->>Controller: Return true
+        deactivate DAO
+        Controller-->>View: Redirect to Appointment UI with flashSuccess
+    else Time Slot Booked
+        Controller-->>View: Return error "Time slot already booked!"
+    end
+    deactivate Controller
+    deactivate View
+        </div>
+    </div>
+
+    <!-- SECTION 4 -->
+    <div class="card">
+        <h2>4. Calculate Cost & Print Bill Workflow</h2>
+        <div class="mermaid">
+sequenceDiagram
+    actor Staff as Staff
+    participant View as Billing UI
+    participant Controller as Billing Controller
+    participant DAO as Billing DAO
+    participant DB as MySQL Stored Procedure
+    participant Receipt as Receipt UI
+
+    Staff->>View: Enter Appointment # (APPT-1001) & Consultation Fee
+    activate View
+    View->>Controller: POST /bills (appointment_number, consultation_fee, cash_given)
+    activate Controller
+    Controller->>DAO: generateBill(apptNum, consultationFee, paymentMethod, cashGiven, balance)
+    activate DAO
+    DAO->>DB: CALL GenerateBill(APPT-1001, consultation_fee, OUT bill_id, OUT total_cost)
+    activate DB
+    DB-->>DAO: Returns bill_id & total_cost
+    deactivate DB
+    DAO->>DB: UPDATE bills SET payment_method=?, cash_given=?, balance_returned=?
+    activate DB
+    DB-->>DAO: Update confirmed
+    deactivate DB
+    DAO->>DB: UPDATE appointments SET status='Completed' WHERE appointment_number=?
+    activate DB
+    DB-->>DAO: Update confirmed
+    deactivate DB
+    DAO->>Controller: Return Bill object
+    deactivate DAO
+    Controller-->>Receipt: Forward to Receipt UI with Bill details
+    activate Receipt
+    Receipt-->>Staff: Render printable thermal/A4 receipt page
+    deactivate Receipt
+    deactivate Controller
+    deactivate View
+        </div>
+    </div>
+
+    <script>
+        mermaid.initialize({ startOnLoad: true, theme: 'default' });
+    </script>
+</body>
+</html>
