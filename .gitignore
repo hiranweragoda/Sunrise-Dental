@@ -11,3 +11,16 @@ target/
 # OS temporary files
 .DS_Store
 Thumbs.db
+
+# Office & Report files (Keep local, exclude from Git)
+*.docx
+*.pdf
+~$*
+
+# Python scratch scripts & temporary assets
+scratch/
+*.png
+*.jpg
+*.jpeg
+*.drawio
+*.html
