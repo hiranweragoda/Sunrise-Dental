@@ -20,7 +20,7 @@
         if ("Admin".equalsIgnoreCase(role)) {
             activeTab = "tab-search";
         } else {
-            activeTab = "tab-register";
+            activeTab = "tab-patients";
         }
     }
 
@@ -106,17 +106,17 @@
         <!-- Sidebar Navigation -->
         <aside class="sidebar">
             <% if (!"Admin".equalsIgnoreCase(role)) { %>
-            <a href="dashboard?tab=tab-register" onclick="switchTab('tab-register'); return false;" id="nav-tab-register" class="nav-item <%= "tab-register".equals(activeTab) ? "active" : "" %>">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
-                </svg>
-                <span>New Appointment</span>
-            </a>
             <a href="dashboard?tab=tab-patients" onclick="switchTab('tab-patients'); return false;" id="nav-tab-patients" class="nav-item <%= "tab-patients".equals(activeTab) ? "active" : "" %>">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                 </svg>
                 <span>Patient Registration</span>
+            </a>
+            <a href="dashboard?tab=tab-register" onclick="switchTab('tab-register'); return false;" id="nav-tab-register" class="nav-item <%= "tab-register".equals(activeTab) ? "active" : "" %>">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+                </svg>
+                <span>New Appointment</span>
             </a>
             <% } %>
             <a href="dashboard?tab=tab-search" onclick="switchTab('tab-search'); return false;" id="nav-tab-search" class="nav-item <%= "tab-search".equals(activeTab) ? "active" : "" %>">
@@ -190,7 +190,85 @@
                 </div>
             <% } %>
 
-            <!-- TAB 1: REGISTER APPOINTMENT -->
+            <!-- TAB 1: PATIENT MANAGEMENT (STAFF ONLY) -->
+            <% if (!"Admin".equalsIgnoreCase(role)) { %>
+            <section id="tab-patients" class="tab-content <%= "tab-patients".equals(activeTab) ? "active" : "" %>">
+                <div class="panel">
+                    <div class="panel-header">
+                        <h2 class="panel-title">Patient Profile Registration & Management</h2>
+                        <p class="panel-subtitle">Register new patients easily (Auto-generates unique Patient ID number for adults & children)</p>
+                    </div>
+
+                    <form action="patients" method="POST">
+                        <input type="hidden" id="patient-id" name="id" value="0">
+                        <input type="hidden" id="patient-nic-input" name="nic_passport" value="">
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="patient-name-input">Patient Full Name</label>
+                                <input type="text" id="patient-name-input" name="patient_name" placeholder="e.g. Nimal Perera or Little Kasun" required minlength="3">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="patient-phone-input">Contact Phone Number</label>
+                                <input type="tel" id="patient-phone-input" name="phone_number" placeholder="e.g. 0771234567" required>
+                            </div>
+
+                            <div class="form-group full-width">
+                                <label for="patient-address-input">Residential Address</label>
+                                <input type="text" id="patient-address-input" name="address" placeholder="e.g. 45 Temple Road, Nugegoda">
+                            </div>
+                        </div>
+
+                        <div class="form-actions" style="margin-top: 1.5rem;">
+                            <button type="button" class="btn btn-secondary" onclick="resetPatientForm()">Clear Form</button>
+                            <button type="submit" class="btn btn-primary">Save Patient Profile</button>
+                        </div>
+                    </form>
+
+                </div> <!-- End Form Card Panel -->
+
+                <!-- Separate Panel Card for Patients Directory Table -->
+                <div class="panel" style="margin-top: 1.75rem;">
+                    <div class="panel-header">
+                        <h2 class="panel-title">Registered Clinic Patients Directory</h2>
+                        <p class="panel-subtitle">Complete list of registered clinic patients, auto-generated Patient IDs, and contact details</p>
+                    </div>
+                    <div class="table-scroll-container">
+                        <table class="report-table" style="margin-top: 0;">
+                            <thead>
+                                <tr>
+                                    <th>Patient ID</th>
+                                    <th>Patient Name</th>
+                                    <th>Contact Phone</th>
+                                    <th>Address</th>
+                                    <th style="text-align: right;">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <% if (patients != null && !patients.isEmpty()) { for (Patient p : patients) { 
+                                    String pID = (p.getNicPassport() != null && !p.getNicPassport().trim().isEmpty()) ? p.getNicPassport().trim() : String.format("PAT-%04d", p.getId());
+                                %>
+                                    <tr>
+                                        <td><span class="status-pill status-scheduled" style="font-size: 0.85rem; padding: 4px 10px; font-weight: 800;"><%= pID %></span></td>
+                                        <td style="font-weight: 600;"><%= p.getPatientName() %></td>
+                                        <td><%= p.getPhoneNumber() %></td>
+                                        <td><%= p.getAddress() != null ? p.getAddress() : "-" %></td>
+                                        <td style="text-align: right; white-space: nowrap;">
+                                            <button type="button" class="btn btn-secondary" style="padding: 5px 12px; font-size: 0.82rem; margin-right: 6px; font-weight: 600;" data-id="<%= p.getId() %>" data-name="<%= p.getPatientName() %>" data-nic="<%= pID %>" data-phone="<%= p.getPhoneNumber() %>" data-address="<%= p.getAddress() != null ? p.getAddress() : "" %>" onclick="handleEditPatient(this)">✏️ Edit</button>
+                                            <a href="patients?action=delete&id=<%= p.getId() %>" class="btn btn-danger" style="padding: 5px 12px; font-size: 0.82rem; font-weight: 700; text-decoration: none;" onclick="return confirm('Delete patient <%= p.getPatientName() %>?')">🗑️ Delete</a>
+                                        </td>
+                                    </tr>
+                                <% } } else { %>
+                                    <tr><td colspan="6" style="text-align: center; color: #64748b;">No registered patients found.</td></tr>
+                                <% } %>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+            <% } %>
+
+            <!-- TAB 2: REGISTER APPOINTMENT -->
             <% if (!"Admin".equalsIgnoreCase(role)) { %>
             <section id="tab-register" class="tab-content <%= "tab-register".equals(activeTab) ? "active" : "" %>">
                 <div class="panel">
@@ -277,84 +355,6 @@
                             <button type="submit" class="btn btn-primary">Register Appointment</button>
                         </div>
                     </form>
-                </div>
-            </section>
-            <% } %>
-
-            <!-- TAB 2: PATIENT MANAGEMENT (STAFF ONLY) -->
-            <% if (!"Admin".equalsIgnoreCase(role)) { %>
-            <section id="tab-patients" class="tab-content <%= "tab-patients".equals(activeTab) ? "active" : "" %>">
-                <div class="panel">
-                    <div class="panel-header">
-                        <h2 class="panel-title">Patient Profile Registration & Management</h2>
-                        <p class="panel-subtitle">Register new patients easily (Auto-generates unique Patient ID number for adults & children)</p>
-                    </div>
-
-                    <form action="patients" method="POST">
-                        <input type="hidden" id="patient-id" name="id" value="0">
-                        <input type="hidden" id="patient-nic-input" name="nic_passport" value="">
-                        <div class="form-grid">
-                            <div class="form-group">
-                                <label for="patient-name-input">Patient Full Name</label>
-                                <input type="text" id="patient-name-input" name="patient_name" placeholder="e.g. Nimal Perera or Little Kasun" required minlength="3">
-                            </div>
-
-                            <div class="form-group">
-                                <label for="patient-phone-input">Contact Phone Number</label>
-                                <input type="tel" id="patient-phone-input" name="phone_number" placeholder="e.g. 0771234567" required>
-                            </div>
-
-                            <div class="form-group full-width">
-                                <label for="patient-address-input">Residential Address</label>
-                                <input type="text" id="patient-address-input" name="address" placeholder="e.g. 45 Temple Road, Nugegoda">
-                            </div>
-                        </div>
-
-                        <div class="form-actions" style="margin-top: 1.5rem;">
-                            <button type="button" class="btn btn-secondary" onclick="resetPatientForm()">Clear Form</button>
-                            <button type="submit" class="btn btn-primary">Save Patient Profile</button>
-                        </div>
-                    </form>
-
-                </div> <!-- End Form Card Panel -->
-
-                <!-- Separate Panel Card for Patients Directory Table -->
-                <div class="panel" style="margin-top: 1.75rem;">
-                    <div class="panel-header">
-                        <h2 class="panel-title">Registered Clinic Patients Directory</h2>
-                        <p class="panel-subtitle">Complete list of registered clinic patients, auto-generated Patient IDs, and contact details</p>
-                    </div>
-                    <div class="table-scroll-container">
-                        <table class="report-table" style="margin-top: 0;">
-                            <thead>
-                                <tr>
-                                    <th>Patient ID</th>
-                                    <th>Patient Name</th>
-                                    <th>Contact Phone</th>
-                                    <th>Address</th>
-                                    <th style="text-align: right;">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <% if (patients != null && !patients.isEmpty()) { for (Patient p : patients) { 
-                                    String pID = (p.getNicPassport() != null && !p.getNicPassport().trim().isEmpty()) ? p.getNicPassport().trim() : String.format("PAT-%04d", p.getId());
-                                %>
-                                    <tr>
-                                        <td><span class="status-pill status-scheduled" style="font-size: 0.85rem; padding: 4px 10px; font-weight: 800;"><%= pID %></span></td>
-                                        <td style="font-weight: 600;"><%= p.getPatientName() %></td>
-                                        <td><%= p.getPhoneNumber() %></td>
-                                        <td><%= p.getAddress() != null ? p.getAddress() : "-" %></td>
-                                        <td style="text-align: right; white-space: nowrap;">
-                                            <button type="button" class="btn btn-secondary" style="padding: 5px 12px; font-size: 0.82rem; margin-right: 6px; font-weight: 600;" data-id="<%= p.getId() %>" data-name="<%= p.getPatientName() %>" data-nic="<%= pID %>" data-phone="<%= p.getPhoneNumber() %>" data-address="<%= p.getAddress() != null ? p.getAddress() : "" %>" onclick="handleEditPatient(this)">✏️ Edit</button>
-                                            <a href="patients?action=delete&id=<%= p.getId() %>" class="btn btn-danger" style="padding: 5px 12px; font-size: 0.82rem; font-weight: 700; text-decoration: none;" onclick="return confirm('Delete patient <%= p.getPatientName() %>?')">🗑️ Delete</a>
-                                        </td>
-                                    </tr>
-                                <% } } else { %>
-                                    <tr><td colspan="6" style="text-align: center; color: #64748b;">No registered patients found.</td></tr>
-                                <% } %>
-                            </tbody>
-                        </table>
-                    </div>
                 </div>
             </section>
             <% } %>
