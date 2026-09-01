@@ -1,0 +1,10 @@
+# Force GitHub Linguist language detection
+*.java linguist-detectable=true
+*.jsp linguist-detectable=true
+*.css linguist-detectable=true
+*.js linguist-detectable=true
+*.sql linguist-detectable=true
+
+# Ignore any generated artifacts or python scripts from language statistics
+*.py linguist-vendored=true
+scratch/* linguist-vendored=true
