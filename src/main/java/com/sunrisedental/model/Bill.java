@@ -22,48 +22,118 @@ public class Bill {
     private String treatmentName;
     private BigDecimal treatmentCost;
 
-    public Bill() {}
+    public Bill() {
+    }
 
-    public int getBillId() { return billId; }
-    public void setBillId(int billId) { this.billId = billId; }
+    public int getBillId() {
+        return billId;
+    }
 
-    public String getBillNumber() { return "INV-" + (1000 + billId); }
+    public void setBillId(int billId) {
+        this.billId = billId;
+    }
 
-    public String getAppointmentNumber() { return appointmentNumber; }
-    public void setAppointmentNumber(String appointmentNumber) { this.appointmentNumber = appointmentNumber; }
+    public String getBillNumber() {
+        return "INV-" + (1000 + billId);
+    }
 
-    public BigDecimal getConsultationFee() { return consultationFee; }
-    public void setConsultationFee(BigDecimal consultationFee) { this.consultationFee = consultationFee; }
+    public String getAppointmentNumber() {
+        return appointmentNumber;
+    }
 
-    public BigDecimal getTotalCost() { return totalCost; }
-    public void setTotalCost(BigDecimal totalCost) { this.totalCost = totalCost; }
+    public void setAppointmentNumber(String appointmentNumber) {
+        this.appointmentNumber = appointmentNumber;
+    }
 
-    public BigDecimal getTotalAmount() { return totalCost; }
+    public BigDecimal getConsultationFee() {
+        return consultationFee;
+    }
 
-    public Timestamp getBillDate() { return billDate; }
-    public void setBillDate(Timestamp billDate) { this.billDate = billDate; }
+    public void setConsultationFee(BigDecimal consultationFee) {
+        this.consultationFee = consultationFee;
+    }
 
-    public String getPaymentStatus() { return paymentStatus; }
-    public void setPaymentStatus(String paymentStatus) { this.paymentStatus = paymentStatus; }
+    public BigDecimal getTotalCost() {
+        return totalCost;
+    }
 
-    public String getPaymentMethod() { return paymentMethod != null ? paymentMethod : "Cash"; }
-    public void setPaymentMethod(String paymentMethod) { this.paymentMethod = paymentMethod; }
+    public void setTotalCost(BigDecimal totalCost) {
+        this.totalCost = totalCost;
+    }
 
-    public BigDecimal getCashGiven() { return cashGiven; }
-    public void setCashGiven(BigDecimal cashGiven) { this.cashGiven = cashGiven; }
+    public BigDecimal getTotalAmount() {
+        return totalCost;
+    }
 
-    public BigDecimal getBalanceReturned() { return balanceReturned; }
-    public void setBalanceReturned(BigDecimal balanceReturned) { this.balanceReturned = balanceReturned; }
+    public Timestamp getBillDate() {
+        return billDate;
+    }
 
-    public String getPatientName() { return patientName; }
-    public void setPatientName(String patientName) { this.patientName = patientName; }
+    public void setBillDate(Timestamp billDate) {
+        this.billDate = billDate;
+    }
 
-    public String getDentistName() { return dentistName; }
-    public void setDentistName(String dentistName) { this.dentistName = dentistName; }
+    public String getPaymentStatus() {
+        return paymentStatus;
+    }
 
-    public String getTreatmentName() { return treatmentName; }
-    public void setTreatmentName(String treatmentName) { this.treatmentName = treatmentName; }
+    public void setPaymentStatus(String paymentStatus) {
+        this.paymentStatus = paymentStatus;
+    }
 
-    public BigDecimal getTreatmentCost() { return treatmentCost; }
-    public void setTreatmentCost(BigDecimal treatmentCost) { this.treatmentCost = treatmentCost; }
+    public String getPaymentMethod() {
+        return paymentMethod != null ? paymentMethod : "Cash";
+    }
+
+    public void setPaymentMethod(String paymentMethod) {
+        this.paymentMethod = paymentMethod;
+    }
+
+    public BigDecimal getCashGiven() {
+        return cashGiven;
+    }
+
+    public void setCashGiven(BigDecimal cashGiven) {
+        this.cashGiven = cashGiven;
+    }
+
+    public BigDecimal getBalanceReturned() {
+        return balanceReturned;
+    }
+
+    public void setBalanceReturned(BigDecimal balanceReturned) {
+        this.balanceReturned = balanceReturned;
+    }
+
+    public String getPatientName() {
+        return patientName;
+    }
+
+    public void setPatientName(String patientName) {
+        this.patientName = patientName;
+    }
+
+    public String getDentistName() {
+        return dentistName;
+    }
+
+    public void setDentistName(String dentistName) {
+        this.dentistName = dentistName;
+    }
+
+    public String getTreatmentName() {
+        return treatmentName;
+    }
+
+    public void setTreatmentName(String treatmentName) {
+        this.treatmentName = treatmentName;
+    }
+
+    public BigDecimal getTreatmentCost() {
+        return treatmentCost;
+    }
+
+    public void setTreatmentCost(BigDecimal treatmentCost) {
+        this.treatmentCost = treatmentCost;
+    }
 }

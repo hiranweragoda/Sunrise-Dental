@@ -69,7 +69,7 @@ sequenceDiagram
     activate View
     View->>Controller: POST /auth (username, password)
     activate Controller
-    Controller->>Controller: Hash password using SHA-256
+    Controller->>Controller: Hash password using BCrypt ($2a$ salted)
     Controller->>DAO: validateUser(username, passwordHash)
     activate DAO
     DAO->>DB: SELECT * FROM users WHERE username=? AND password_hash=?
@@ -106,18 +106,22 @@ sequenceDiagram
     activate Controller
     Controller->>DAO: createPatient(Patient object)
     activate DAO
-    DAO->>DB: INSERT INTO patients (patient_name, address, phone_number) VALUES (...)
-    activate DB
-    DB-->>DAO: Return generated primary key (e.g. ID = 5)
-    deactivate DB
-    DAO->>DAO: Format Patient ID Code: PAT-0005
-    DAO->>DB: UPDATE patients SET patient_id='PAT-0005' WHERE id=5
-    activate DB
-    DB-->>DAO: Update confirmed
-    deactivate DB
-    DAO-->>Controller: Return true (Success)
+    alt Valid Patient Data
+        DAO->>DB: INSERT INTO patients (patient_name, address, phone_number) VALUES (...)
+        activate DB
+        DB-->>DAO: Return generated primary key (e.g. ID = 5)
+        deactivate DB
+        DAO->>DAO: Format Patient ID Code: PAT-0005
+        DAO->>DB: UPDATE patients SET patient_id='PAT-0005' WHERE id=5
+        activate DB
+        DB-->>DAO: Update confirmed
+        deactivate DB
+        DAO-->>Controller: Return true (Success)
+        Controller-->>View: Redirect to Patient UI with flashSuccess
+    else Invalid / Missing Fields
+        Controller-->>View: Return error "Required fields missing!"
+    end
     deactivate DAO
-    Controller-->>View: Redirect to Patient UI with flashSuccess
     deactivate Controller
     deactivate View
         </div>
@@ -184,24 +188,28 @@ sequenceDiagram
     activate Controller
     Controller->>DAO: generateBill(apptNum, consultationFee, paymentMethod, cashGiven, balance)
     activate DAO
-    DAO->>DB: CALL GenerateBill(APPT-1001, consultation_fee, OUT bill_id, OUT total_cost)
-    activate DB
-    DB-->>DAO: Returns bill_id & total_cost
-    deactivate DB
-    DAO->>DB: UPDATE bills SET payment_method=?, cash_given=?, balance_returned=?
-    activate DB
-    DB-->>DAO: Update confirmed
-    deactivate DB
-    DAO->>DB: UPDATE appointments SET status='Completed' WHERE appointment_number=?
-    activate DB
-    DB-->>DAO: Update confirmed
-    deactivate DB
-    DAO->>Controller: Return Bill object
+    alt Appointment Found
+        DAO->>DB: CALL GenerateBill(APPT-1001, consultation_fee, OUT bill_id, OUT total_cost)
+        activate DB
+        DB-->>DAO: Returns bill_id & total_cost
+        deactivate DB
+        DAO->>DB: UPDATE bills SET payment_method=?, cash_given=?, balance_returned=?
+        activate DB
+        DB-->>DAO: Update confirmed
+        deactivate DB
+        DAO->>DB: UPDATE appointments SET status='Completed' WHERE appointment_number=?
+        activate DB
+        DB-->>DAO: Update confirmed
+        deactivate DB
+        DAO-->>Controller: Return Bill object
+        Controller-->>Receipt: Forward to Receipt UI with Bill details
+        activate Receipt
+        Receipt-->>Staff: Render printable thermal/A4 receipt page
+        deactivate Receipt
+    else Appointment Not Found
+        Controller-->>View: Return error "Appointment # not found!"
+    end
     deactivate DAO
-    Controller-->>Receipt: Forward to Receipt UI with Bill details
-    activate Receipt
-    Receipt-->>Staff: Render printable thermal/A4 receipt page
-    deactivate Receipt
     deactivate Controller
     deactivate View
         </div>
