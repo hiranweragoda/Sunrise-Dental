@@ -1,10 +1,15 @@
-# Force GitHub Linguist language detection
-*.java linguist-detectable=true
-*.jsp linguist-detectable=true
-*.css linguist-detectable=true
-*.js linguist-detectable=true
-*.sql linguist-detectable=true
+# Language overrides for GitHub Linguist
+*.java linguist-detectable
+*.jsp linguist-detectable
+*.css linguist-detectable
+*.js linguist-detectable
+*.sql linguist-detectable
 
-# Ignore any generated artifacts or python scripts from language statistics
-*.py linguist-vendored=true
-scratch/* linguist-vendored=true
+# Exclude non-source / scripts from language stats
+*.py linguist-vendored
+*.py -linguist-detectable
+scratch/* linguist-vendored
+scratch/** linguist-vendored
+*.html linguist-vendored
+*.docx linguist-vendored
+*.pdf linguist-vendored
