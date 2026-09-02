@@ -15,7 +15,7 @@ public class SecurityPasswordHashTest {
         assertNotNull(hashedPassword);
         assertTrue(hashedPassword.startsWith("$2a$") || hashedPassword.startsWith("$2b$"));
         assertEquals(60, hashedPassword.length()); // Standard BCrypt hash is 60 characters
-        assertTrue(BCrypt.checkpw("wrong_admin", hashedPassword));
+        assertTrue(BCrypt.checkpw("admin123", hashedPassword));
         assertFalse(BCrypt.checkpw("wrongpass", hashedPassword));
     }
 
